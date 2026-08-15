@@ -10,9 +10,10 @@ import { useLocaleStore } from '../../store/useLocaleStore';
 
 interface ProductCardProps {
   product: Product;
+  index?: number;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   const { addItem } = useCartStore();
   const { toggleWishlist, isWishlisted } = useWishlistStore();
   const { setSelectedProductDetail } = useProductStore();
@@ -46,8 +47,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <motion.div
-      whileHover={{ y: -6, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
-      transition={{ duration: 0.2, ease: 'easeInOut' }}
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.4, delay: (index % 8) * 0.05, ease: 'easeOut' }}
+      whileHover={{ y: -6, transition: { duration: 0.2, ease: 'easeInOut' }, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
       onClick={() => setSelectedProductDetail(product)}
       className="group relative bg-white rounded-3xl border border-slate-200 overflow-hidden flex flex-col justify-between cursor-pointer transition-all duration-200"
     >

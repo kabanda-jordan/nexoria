@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProductCard } from './ProductCard';
+import { FadeIn } from '../ui/FadeIn';
 import { useProductStore } from '../../store/useProductStore';
 import { useLocaleStore } from '../../store/useLocaleStore';
 import { Filter, SlidersHorizontal, ChevronLeft, ChevronRight, Sparkles, RefreshCw } from 'lucide-react';
@@ -80,7 +81,8 @@ export const ProductGrid: React.FC = () => {
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Top Filter Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+      <FadeIn>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200">
         <div>
           <h2 className="text-2xl font-black text-slate-900 flex items-center gap-2 tracking-tight">
             <span>{selectedCategorySlug ? categories.find(c => c.slug === selectedCategorySlug)?.name_en : 'All Marketplace Products'}</span>
@@ -126,8 +128,9 @@ export const ProductGrid: React.FC = () => {
               <option value="newest">Newest Arrivals</option>
             </select>
           </div>
-        </div>
-      </div>
+          </div>
+          </div>
+        </FadeIn>
 
       {/* Grid Container */}
       {paginatedProducts.length > 0 ? (
@@ -135,9 +138,9 @@ export const ProductGrid: React.FC = () => {
           layout
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-6"
         >
-          <AnimatePresence>
-            {paginatedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <AnimatePresence mode="popLayout">
+            {paginatedProducts.map((product, idx) => (
+              <ProductCard key={product.id} product={product} index={idx} />
             ))}
           </AnimatePresence>
         </motion.div>

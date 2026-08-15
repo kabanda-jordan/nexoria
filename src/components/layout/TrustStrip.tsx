@@ -1,5 +1,6 @@
 import React from 'react';
 import { Truck, ShieldCheck, Headphones, Gift } from 'lucide-react';
+import { FadeIn } from '../ui/FadeIn';
 import { useLocaleStore } from '../../store/useLocaleStore';
 
 export const TrustStrip: React.FC = () => {
@@ -39,15 +40,17 @@ export const TrustStrip: React.FC = () => {
           {features.map((item, idx) => {
             const IconComponent = item.icon;
             return (
-              <div key={idx} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 transition-colors">
-                <div className={`p-3.5 rounded-2xl ${item.color} shrink-0`}>
-                  <IconComponent className="w-6 h-6" />
+              <FadeIn key={idx} delay={idx * 0.08}>
+                <div className="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 transition-colors">
+                  <div className={`p-3.5 rounded-2xl ${item.color} shrink-0`}>
+                    <IconComponent className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-slate-900 leading-snug">{item.title}</h4>
+                    <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{item.desc}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-sm text-slate-900 leading-snug">{item.title}</h4>
-                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{item.desc}</p>
-                </div>
-              </div>
+              </FadeIn>
             );
           })}
         </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Header } from './components/layout/Header';
 import { HeroCarousel } from './components/layout/HeroCarousel';
 import { TrustStrip } from './components/layout/TrustStrip';
@@ -32,34 +33,57 @@ export function App() {
       <Header />
 
       {/* Role View Routing */}
-      {activeRole === 'buyer' && (
-        <main className="flex-1">
-          <HeroCarousel />
-          <TrustStrip />
-          <ProductGrid />
-          <Footer />
+      <AnimatePresence mode="wait">
+        {activeRole === 'buyer' && (
+          <motion.main
+            key="buyer"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="flex-1"
+          >
+            <HeroCarousel />
+            <TrustStrip />
+            <ProductGrid />
+            <Footer />
 
-          {/* Buyer Drawers & Modals */}
-          <ProductDetailModal />
-          <CartDrawer />
-          <WishlistDrawer />
-          <CheckoutModal />
-          <MoMoPaymentModal />
-          <OrderTrackerModal />
-        </main>
-      )}
+            {/* Buyer Drawers & Modals */}
+            <ProductDetailModal />
+            <CartDrawer />
+            <WishlistDrawer />
+            <CheckoutModal />
+            <MoMoPaymentModal />
+            <OrderTrackerModal />
+          </motion.main>
+        )}
 
-      {activeRole === 'seller' && (
-        <main className="flex-1">
-          <SellerDashboard />
-        </main>
-      )}
+        {activeRole === 'seller' && (
+          <motion.main
+            key="seller"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="flex-1"
+          >
+            <SellerDashboard />
+          </motion.main>
+        )}
 
-      {activeRole === 'admin' && (
-        <main className="flex-1">
-          <AdminDashboard />
-        </main>
-      )}
+        {activeRole === 'admin' && (
+          <motion.main
+            key="admin"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="flex-1"
+          >
+            <AdminDashboard />
+          </motion.main>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

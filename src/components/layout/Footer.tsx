@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocaleStore } from '../../store/useLocaleStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { ShieldCheck, Phone, Mail, MapPin, Smartphone, CreditCard, Banknote } from 'lucide-react';
+import { FadeIn } from '../ui/FadeIn';
 import { Logo } from '../ui/Logo';
 
 export const Footer: React.FC = () => {
@@ -14,6 +15,7 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-slate-800">
           
           {/* Brand & Vision */}
+          <FadeIn delay={0} y={16}>
           <div className="lg:col-span-2 space-y-4">
             <Logo variant="dark" />
 
@@ -36,8 +38,10 @@ export const Footer: React.FC = () => {
               </div>
             </div>
           </div>
+          </FadeIn>
 
           {/* Quick Links */}
+          <FadeIn delay={0.1} y={16}>
           <div>
             <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Ibyiciro by'Ibicuruzwa</h4>
             <ul className="space-y-2.5 text-xs text-slate-400">
@@ -48,8 +52,10 @@ export const Footer: React.FC = () => {
               <li><a href="#" className="hover:text-emerald-400 transition-colors">Ibikorwa by'Amaboko & Agaseke</a></li>
             </ul>
           </div>
+          </FadeIn>
 
           {/* Sellers & Partners */}
+          <FadeIn delay={0.2} y={16}>
           <div>
             <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Abagurisha (Vendors)</h4>
             <ul className="space-y-2.5 text-xs text-slate-400">
@@ -63,8 +69,10 @@ export const Footer: React.FC = () => {
               <li><a href="#" className="hover:text-emerald-400 transition-colors">Kwibutsa Payouts ya MoMo</a></li>
             </ul>
           </div>
+          </FadeIn>
 
           {/* Rwanda Mobile Money Badges */}
+          <FadeIn delay={0.3} y={16}>
           <div>
             <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Kwishyura Mu Rwanda</h4>
             <p className="text-xs text-slate-400 mb-3">Tukwemerera kwishyura mu buryo bwose bwizewe:</p>
@@ -87,6 +95,7 @@ export const Footer: React.FC = () => {
               </div>
             </div>
           </div>
+          </FadeIn>
 
         </div>
 
