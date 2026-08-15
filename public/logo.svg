@@ -1,0 +1,34 @@
+<svg width="640" height="220" viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E8F5B"/>
+      <stop offset="100%" stop-color="#095E3C"/>
+    </linearGradient>
+    <linearGradient id="rwGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5A623"/>
+      <stop offset="100%" stop-color="#E8930F"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon badge -->
+  <rect x="10" y="30" width="160" height="160" rx="38" fill="url(#badgeGrad)"/>
+
+  <!-- Geometric N mark (scaled ~15%) -->
+  <rect x="52" y="58" width="20" height="104" rx="10" fill="#FFFFFF"/>
+  <rect x="118" y="58" width="20" height="104" rx="10" fill="#FFFFFF"/>
+  <line x1="62" y1="66" x2="128" y2="150" stroke="#FFFFFF" stroke-width="23" stroke-linecap="round"/>
+  <circle cx="128" cy="66" r="13" fill="#F5A623"/>
+
+  <!-- Wordmark -->
+  <text x="185" y="120" font-family="Plus Jakarta Sans, Arial, Helvetica, sans-serif" font-weight="800"
+        font-size="64" fill="#0B1220">Nexora</text>
+
+  <!-- RW badge -->
+  <rect x="465" y="55" width="52" height="30" rx="15" fill="url(#rwGrad)"/>
+  <text x="491" y="76" font-family="Plus Jakarta Sans, Arial, Helvetica, sans-serif" font-weight="700"
+        font-size="16" fill="#FFFFFF" text-anchor="middle">RW</text>
+
+  <!-- Tagline -->
+  <text x="187" y="155" font-family="Plus Jakarta Sans, Arial, Helvetica, sans-serif" font-weight="700"
+        font-size="17" letter-spacing="3" fill="#0E8F5B">RWANDA MARKETPLACE</text>
+</svg>

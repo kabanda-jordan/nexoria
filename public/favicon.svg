@@ -1,0 +1,19 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E8F5B"/>
+      <stop offset="100%" stop-color="#095E3C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Full-bleed background -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+
+  <!-- Geometric N mark -->
+  <rect x="300" y="260" width="86" height="504" rx="43" fill="#FFFFFF"/>
+  <rect x="638" y="260" width="86" height="504" rx="43" fill="#FFFFFF"/>
+  <line x1="343" y1="300" x2="681" y2="724" stroke="#FFFFFF" stroke-width="112" stroke-linecap="round"/>
+
+  <!-- Connection-node accent -->
+  <circle cx="681" cy="300" r="58" fill="#F5A623"/>
+</svg>

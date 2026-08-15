@@ -1,0 +1,228 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum ShopStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+}
+
+enum ProductStatus {
+  ACTIVE
+  DRAFT
+  OUT_OF_STOCK
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  MOMO_MTN
+  MOMO_AIRTEL
+  CARD
+  COD
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PayoutMethod {
+  MOMO
+  AIRTEL
+  BANK
+}
+
+enum PayoutStatus {
+  PENDING
+  COMPLETED
+  REJECTED
+}
+
+model User {
+  id          String    @id @default(uuid())
+  phone       String    @unique
+  email       String    @unique
+  name        String
+  password    String
+  role        Role      @default(BUYER)
+  locale      String    @default("rw")
+  avatarUrl   String?
+  verifiedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  shops       Shop[]
+  orders      Order[]
+  reviews     Review[]
+  wishlists   Wishlist[]
+}
+
+model Shop {
+  id          String     @id @default(uuid())
+  ownerId     String
+  owner       User       @relation(fields: [ownerId], references: [id])
+  name        String
+  slug        String     @unique
+  logoUrl     String
+  bannerUrl   String
+  bio         String
+  phone       String
+  whatsapp    String
+  tinNumber   String?
+  district    String
+  status      ShopStatus @default(PENDING)
+  verified    Boolean    @default(false)
+  ratingAvg   Float      @default(5.0)
+  reviewCount Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  products    Product[]
+  orders      Order[]
+  payouts     Payout[]
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  nameRw      String
+  nameEn      String
+  nameFr      String
+  slug        String    @unique
+  icon        String
+  parentId    String?
+  parent      Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+
+  products    Product[]
+}
+
+model Product {
+  id             String        @id @default(uuid())
+  shopId         String
+  shop           Shop          @relation(fields: [shopId], references: [id])
+  categoryId     String
+  category       Category      @relation(fields: [categoryId], references: [id])
+  title          String
+  description    String
+  price          Float
+  originalPrice  Float?
+  sku            String        @unique
+  stock          Int           @default(0)
+  status         ProductStatus @default(ACTIVE)
+  images         String[]
+  ratingAvg      Float         @default(5.0)
+  reviewCount    Int           @default(0)
+  featured       Boolean       @default(false)
+  flashDeal      Boolean       @default(false)
+  tags           String[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  variants       ProductVariant[]
+  orderItems     OrderItem[]
+  reviews        Review[]
+  wishlists      Wishlist[]
+}
+
+model ProductVariant {
+  id         String   @id @default(uuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name       String
+  priceDelta Float    @default(0)
+  stock      Int      @default(0)
+  sku        String   @unique
+
+  orderItems OrderItem[]
+}
+
+model Order {
+  id            String        @id @default(uuid())
+  buyerId       String
+  buyer         User          @relation(fields: [buyerId], references: [id])
+  shopId        String
+  shop          Shop          @relation(fields: [shopId], references: [id])
+  status        OrderStatus   @default(PENDING)
+  subtotal      Float
+  deliveryFee   Float         @default(0)
+  total         Float
+  paymentMethod PaymentMethod @default(MOMO_MTN)
+  paymentStatus PaymentStatus @default(PENDING)
+  district      String
+  sector        String
+  cell          String
+  streetAddress String
+  trackingCode  String        @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id        String          @id @default(uuid())
+  orderId   String
+  order     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product         @relation(fields: [productId], references: [id])
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+  qty       Int             @default(1)
+  unitPrice Float
+}
+
+model Review {
+  id               String   @id @default(uuid())
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  buyerId          String
+  buyer            User     @relation(fields: [buyerId], references: [id])
+  rating           Int
+  comment          String
+  verifiedPurchase Boolean  @default(true)
+  createdAt        DateTime @default(now())
+}
+
+model Payout {
+  id            String       @id @default(uuid())
+  shopId        String
+  shop          Shop         @relation(fields: [shopId], references: [id])
+  amount        Float
+  method        PayoutMethod @default(MOMO)
+  accountNumber String
+  accountName   String
+  status        PayoutStatus @default(PENDING)
+  requestedAt   DateTime     @default(now())
+  processedAt   DateTime?
+}
+
+model Wishlist {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, productId])
+}
