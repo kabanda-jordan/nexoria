@@ -23,6 +23,12 @@ import { useProductStore } from '../../store/useProductStore';
 import { Locale } from '../../types';
 import { Logo } from '../ui/Logo';
 
+const LANGUAGE_NAMES: Record<Locale, string> = {
+  rw: 'Kinyarwanda',
+  en: 'English',
+  fr: 'Français',
+};
+
 export const Header: React.FC = () => {
   const { getItemCount, openCart } = useCartStore();
   const { wishlistIds, openWishlist } = useWishlistStore();
@@ -183,19 +189,22 @@ export const Header: React.FC = () => {
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 border border-slate-200 transition-colors"
               >
                 <Globe className="w-4 h-4 text-emerald-600" />
-                <span className="uppercase">{locale}</span>
+                <span>{LANGUAGE_NAMES[locale]}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
 
               {isLangOpen && (
-                <div className="absolute right-0 mt-2 w-36 bg-white rounded-2xl shadow-xl border border-slate-200 py-1 z-50">
+                <div className="absolute right-0 mt-2 w-40 bg-white rounded-2xl shadow-xl border border-slate-200 py-1 z-50">
                   {(['rw', 'en', 'fr'] as Locale[]).map((l) => (
                     <button
                       key={l}
                       onClick={() => { setLocale(l); setIsLangOpen(false); }}
-                      className={`w-full text-left px-4 py-2 text-xs font-semibold hover:bg-slate-50 ${locale === l ? 'text-emerald-600 bg-emerald-50' : 'text-slate-700'}`}
+                      className={`w-full text-left px-4 py-2 text-xs font-semibold hover:bg-slate-50 flex items-center gap-2 ${locale === l ? 'text-emerald-600 bg-emerald-50' : 'text-slate-700'}`}
                     >
-                      {l === 'rw' ? '🇷🇼 Kinyarwanda' : l === 'en' ? '🇬🇧 English' : '🇫🇷 Français'}
+                      <span className={`w-6 text-[10px] font-black tracking-wider ${locale === l ? 'text-emerald-500' : 'text-slate-400'}`}>
+                        {l.toUpperCase()}
+                      </span>
+                      {LANGUAGE_NAMES[l]}
                     </button>
                   ))}
                 </div>

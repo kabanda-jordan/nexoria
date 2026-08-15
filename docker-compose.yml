@@ -1,26 +1,12 @@
-version: '3.8'
-
 services:
-  nexora-frontend:
+  nexora:
     build:
       context: .
       dockerfile: Dockerfile
+    image: nexora-rwanda-marketplace
+    container_name: nexora
     ports:
-      - "3000:80"
-    environment:
-      - NODE_ENV=production
-    restart: always
-
-  # Backend services definition for full-stack deployment
-  nexora-redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-
-  nexora-meilisearch:
-    image: getmeili/meilisearch:v1.5
-    ports:
-      - "7700:7700"
-    environment:
-      - MEILI_NO_ANALYTICS=true
-      - MEILI_MASTER_KEY=nexora_master_key_rwanda_2026
+      - "8080:3001"
+    env_file:
+      - .env
+    restart: unless-stopped

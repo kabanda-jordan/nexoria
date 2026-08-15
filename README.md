@@ -51,6 +51,33 @@ npm run dev
 
 ---
 
+## 🐳 Docker (Containerized Demo)
+
+The Docker image builds the frontend and serves **everything from one container** — the SPA, the mock REST API, and the Swagger UI — on a single port.
+
+```bash
+# Build the image
+docker compose build
+
+# Start the container (or `docker compose up --build` to build & run in one go)
+docker compose up -d
+```
+
+- **App + Swagger UI**: http://localhost:8080 (host port `8080` → container port `3001`; change the left-hand number if you prefer another port)
+- The Resend API key is injected at runtime from your local `.env` via `env_file:` — it is **not** baked into the image.
+- `docker compose down` stops the container; `docker compose down -v` also removes it.
+
+Run the raw image without Compose:
+
+```bash
+docker build -t nexora-rwanda-marketplace .
+docker run -p 8080:3001 nexora-rwanda-marketplace
+```
+
+> Note: the default host port is `8080` so it doesn't collide with the Vite dev server on port `3000`. Change it freely, e.g. `-p 3000:3001` when the dev server is stopped.
+
+---
+
 ## 🛠️ Tech Stack
 
 | Layer | Technology |

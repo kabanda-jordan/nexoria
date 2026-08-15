@@ -23,7 +23,7 @@ interface AuthState {
   setActiveRole: (role: UserRole) => void;
 
   // Actions
-  login: (emailOrPhone: string, password?: string) => boolean;
+  login: (name: string, emailOrPhone: string, password?: string) => boolean;
   startSignup: (name: string, email: string, phone: string, role: UserRole, password?: string) => Promise<{ success: boolean; message: string; notice?: string }>;
   resendVerificationCode: () => Promise<boolean>;
   verifyEmailCode: (code: string) => boolean;
@@ -31,16 +31,8 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  currentUser: {
-    id: 'user-demo-1',
-    name: 'Jean-Luc Rutaremara',
-    phone: '+250 788 554 321',
-    email: 'jeanluc@nexora.rw',
-    role: 'buyer',
-    locale: 'rw',
-    avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
-  },
-  isAuthenticated: true,
+  currentUser: null,
+  isAuthenticated: false,
   activeRole: 'buyer',
   isAuthModalOpen: false,
   authMode: 'login',
@@ -55,15 +47,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setAuthMode: (mode: AuthMode) => set({ authMode: mode }),
   setActiveRole: (role: UserRole) => set({ activeRole: role }),
 
-  login: (emailOrPhone, password) => {
+  login: (name, emailOrPhone) => {
+    const isEmail = emailOrPhone.includes('@');
     const user: User = {
       id: `user-${Date.now()}`,
-      name: emailOrPhone.includes('@') ? emailOrPhone.split('@')[0] : 'Nexora User',
-      email: emailOrPhone.includes('@') ? emailOrPhone : 'user@nexora.rw',
-      phone: emailOrPhone.startsWith('+') ? emailOrPhone : '+250 788 000 111',
+      name: name.trim() || (isEmail ? emailOrPhone.split('@')[0] : 'Nexora User'),
+      email: isEmail ? emailOrPhone.trim() : 'user@nexora.rw',
+      phone: isEmail ? '+250 788 000 000' : emailOrPhone.trim(),
       role: 'buyer',
       locale: 'rw',
-      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
+      verified_at: new Date().toISOString(),
     };
     set({ currentUser: user, isAuthenticated: true, isAuthModalOpen: false });
     return true;

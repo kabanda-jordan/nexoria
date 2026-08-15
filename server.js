@@ -2,6 +2,7 @@ import http from 'http';
 import https from 'https';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Parse .env file
 function loadEnv() {
@@ -25,6 +26,28 @@ loadEnv();
 
 const PORT = 3001;
 const RESEND_API_KEY = process.env.VITE_RESEND_API_KEY || 're_E2LJw4WD_CUP5y3YsoETT9aQfck5Xuz5v';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const STATIC_DIR = path.resolve(__dirname, 'dist');
+
+const MIME_TYPES = {
+  '.html': 'text/html',
+  '.js': 'text/javascript',
+  '.mjs': 'text/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.txt': 'text/plain',
+  '.map': 'application/json',
+};
 
 // --- SEED DATA ENGINE FOR BACKEND ---
 const CATEGORIES = [
@@ -765,11 +788,43 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // --- STATIC FRONTEND (SPA) ---
+  if (req.method === 'GET') {
+    let urlPath = pathname === '/' ? '/index.html' : pathname;
+    try {
+      urlPath = decodeURIComponent(urlPath);
+    } catch (e) {
+      urlPath = '/index.html';
+    }
+
+    let filePath = path.join(STATIC_DIR, urlPath);
+    if (!filePath.startsWith(STATIC_DIR)) {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Forbidden' }));
+      return;
+    }
+
+    if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+      filePath = path.join(STATIC_DIR, 'index.html');
+    }
+
+    if (!fs.existsSync(filePath)) {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Not Found' }));
+      return;
+    }
+
+    const ext = path.extname(filePath).toLowerCase();
+    res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
+    fs.createReadStream(filePath).pipe(res);
+    return;
+  }
+
   res.writeHead(404, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ error: 'Endpoint Not Found' }));
 });
 
 server.listen(PORT, () => {
-  console.log(`Nexora Resend & Swagger UI Server running on http://localhost:${PORT}`);
+  console.log(`Nexora server running on http://localhost:${PORT}`);
   console.log(`Swagger UI Documentation available at http://localhost:${PORT}/api/docs`);
 });

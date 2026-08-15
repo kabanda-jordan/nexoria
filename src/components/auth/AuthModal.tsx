@@ -28,6 +28,7 @@ export const AuthModal: React.FC = () => {
   const { addToast } = useToastStore();
 
   // Form states
+  const [loginName, setLoginName] = useState('');
   const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
@@ -56,8 +57,8 @@ export const AuthModal: React.FC = () => {
       return;
     }
 
-    login(loginIdentifier, loginPassword);
-    addToast('Welcome back to Nexora! 👋', `Logged in as ${loginIdentifier}`);
+    login(loginName, loginIdentifier, loginPassword);
+    addToast('Welcome back to Nexora! 👋', `Logged in as ${loginName.trim() || loginIdentifier}`);
   };
 
   const handleSignupSubmit = async (e: React.FormEvent) => {
@@ -156,6 +157,21 @@ export const AuthModal: React.FC = () => {
             {/* LOGIN MODE */}
             {authMode === 'login' && (
               <form onSubmit={handleLoginSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
+                  <div className="relative flex items-center">
+                    <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5" />
+                    <input
+                      type="text"
+                      required
+                      value={loginName}
+                      onChange={(e) => setLoginName(e.target.value)}
+                      placeholder="e.g. Jean-Luc Rutaremara"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium text-slate-900 outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Email or Phone Number</label>
                   <div className="relative flex items-center">
