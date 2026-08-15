@@ -219,7 +219,7 @@ export const Header: React.FC = () => {
                   className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 p-1.5 rounded-2xl border border-slate-200 cursor-pointer transition-colors"
                 >
                   <img
-                    src={currentUser.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop'}
+                    src={currentUser.avatar_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop'}
                     alt={currentUser.name}
                     className="w-7 h-7 rounded-xl object-cover"
                   />

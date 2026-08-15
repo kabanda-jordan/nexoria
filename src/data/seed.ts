@@ -86,11 +86,11 @@ export function generateShops(): Shop[] {
 
   const shops: Shop[] = [];
   const logos = [
-    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?q=80&w=200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
+    "https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?q=80&w=200&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?q=80&w=200&auto=format&fit=crop"
   ];
   const banners = [
     "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800&auto=format&fit=crop",
@@ -173,7 +173,7 @@ const PRODUCT_TEMPLATES = [
     catId: 'cat-3',
     category_slug: 'fashion-apparel',
     items: [
-      { title: "Modern Kitenge Tailored Umushanana Set", price: 85000, img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop", desc: "Elegant ceremonial attire for weddings and cultural celebrations." },
+      { title: "Modern Kitenge Tailored Umushanana Set", price: 85000, img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop", desc: "Elegant ceremonial attire for weddings and cultural celebrations." },
       { title: "African Print Wax Cotton Shirt (Men)", price: 28000, img: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=600&auto=format&fit=crop", desc: "Vibrant custom fit Kitenge shirt." },
       { title: "Handmade Rwandan Leather Sandals", price: 18000, img: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=600&auto=format&fit=crop", desc: "Durable genuine leather sandals crafted in Kigali." }
     ]

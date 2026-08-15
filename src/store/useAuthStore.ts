@@ -120,7 +120,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           role: pendingUser.role,
           locale: 'rw',
           verified_at: new Date().toISOString(),
-          avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200&auto=format&fit=crop',
+          avatar_url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop',
         };
         set({
           currentUser: newUser,

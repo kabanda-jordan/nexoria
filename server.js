@@ -87,7 +87,7 @@ function generateBackendShops() {
       owner_id: `user-${shopIndex}`,
       name,
       slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      logo_url: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200&auto=format&fit=crop",
+      logo_url: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop",
       banner_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=800&auto=format&fit=crop",
       bio: t.bio,
       phone: `+250 78${Math.floor(1000000 + Math.random() * 8999999)}`,
@@ -113,7 +113,7 @@ function generateBackendProducts() {
     { title: 'MacBook Pro 14" M3 Chip 16GB RAM', price: 2150000, catId: 'cat-2', catSlug: 'electronics-computers', img: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=600&auto=format&fit=crop", desc: "Powerful Apple Silicon M3 laptop ideal for developers." },
     { title: "Gorilla's Coffee Whole Arabica Beans (500g)", price: 8500, catId: 'cat-4', catSlug: 'rwandan-coffee-tea', img: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?q=80&w=600&auto=format&fit=crop", desc: "100% Bourbon Arabica grown in Huye & Musanze volcanic soil." },
     { title: "Handwoven Agaseke Peace Basket (Large)", price: 25000, catId: 'cat-5', catSlug: 'artisanal-crafts', img: "https://images.unsplash.com/photo-1590736969955-71cc94801759?q=80&w=600&auto=format&fit=crop", desc: "Traditional Rwandan peace basket handwoven by women artisans." },
-    { title: "Modern Kitenge Tailored Umushanana Set", price: 85000, catId: 'cat-3', catSlug: 'fashion-apparel', img: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=600&auto=format&fit=crop", desc: "Elegant ceremonial attire for weddings and cultural events." },
+    { title: "Modern Kitenge Tailored Umushanana Set", price: 85000, catId: 'cat-3', catSlug: 'fashion-apparel', img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop", desc: "Elegant ceremonial attire for weddings and cultural events." },
   ];
 
   const products = [];
