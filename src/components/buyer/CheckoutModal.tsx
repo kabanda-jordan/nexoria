@@ -56,7 +56,7 @@ export const CheckoutModal: React.FC = () => {
     }
 
     const firstShop = items[0].product.shop_id;
-    const firstShopName = items[0].product.shop_name || 'Isoko Verified Shop';
+    const firstShopName = items[0].product.shop_name || 'Nexora Verified Shop';
 
     const orderItems = items.map((i) => ({
       id: `item-${Date.now()}-${Math.random()}`,
@@ -98,7 +98,7 @@ export const CheckoutModal: React.FC = () => {
     } else {
       addToast(
         'Order Placed Successfully! 🎉',
-        `Order ${newOrder.id} has been registered. Track status live on Isoko!`,
+        `Order ${newOrder.id} has been registered. Track status live on Nexora!`,
         'success'
       );
     }

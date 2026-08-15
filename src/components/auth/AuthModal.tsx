@@ -108,7 +108,7 @@ export const AuthModal: React.FC = () => {
     if (verified) {
       addToast('Account Verified & Created! 🎉', 'Welcome to Nexora Rwanda Marketplace.');
     } else {
-      addToast('Invalid Verification Code', `Code entered is incorrect. Try code ${pendingVerificationCode || '123456'}.`, 'error');
+      addToast('Invalid Verification Code', 'The code you entered is incorrect. Please check your inbox and try again.', 'error');
     }
   };
 

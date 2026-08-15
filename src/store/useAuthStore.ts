@@ -116,8 +116,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   verifyEmailCode: (enteredCode: string) => {
     const { pendingVerificationCode, pendingUser } = get();
     
-    // Accept exact match or test code '123456'
-    if (enteredCode === pendingVerificationCode || enteredCode === '123456') {
+    // Accept the exact verification code that was dispatched
+    if (enteredCode === pendingVerificationCode) {
       if (pendingUser) {
         const newUser: User = {
           id: `user-${Date.now()}`,

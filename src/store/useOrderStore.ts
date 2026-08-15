@@ -37,7 +37,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     const newOrder: Order = {
       ...orderData,
       id: `ORD-2026-${Math.floor(1000 + Math.random() * 8999)}`,
-      tracking_code: `ISK-TRK-${Math.floor(10000 + Math.random() * 89999)}`,
+      tracking_code: `NXR-TRK-${Math.floor(10000 + Math.random() * 89999)}`,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };

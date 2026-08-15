@@ -214,7 +214,7 @@ export function generate2000Products(shops: Shop[]): Product[] {
       description: `${template.desc} Sold directly by ${shop.name} in ${shop.district}, Rwanda. Guaranteed quality with fast delivery.`,
       price: roundedPrice,
       original_price: Math.random() > 0.6 ? Math.round((roundedPrice * 1.2) / 500) * 500 : undefined,
-      sku: `ISK-SKU-${10000 + counter}`,
+      sku: `NXR-SKU-${10000 + counter}`,
       stock: Math.floor(5 + Math.random() * 85),
       status: 'active',
       images: [
@@ -308,7 +308,7 @@ export const INITIAL_ORDERS: Order[] = [
     sector: 'Kimironko',
     cell: 'Kibagabaga',
     street_address: 'KG 123 St, House 14',
-    tracking_code: 'ISK-TRK-99201',
+    tracking_code: 'NXR-TRK-99201',
     created_at: new Date(Date.now() - 86400000 * 1).toISOString(),
     updated_at: new Date().toISOString(),
   }

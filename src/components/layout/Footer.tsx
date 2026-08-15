@@ -39,7 +39,7 @@ export const Footer: React.FC = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Gura & Hahaha</h4>
+            <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Ibyiciro by'Ibicuruzwa</h4>
             <ul className="space-y-2.5 text-xs text-slate-400">
               <li><a href="#" className="hover:text-emerald-400 transition-colors">Telefone n'Ibikoresho</a></li>
               <li><a href="#" className="hover:text-emerald-400 transition-colors">Ibyuma by'Ikoranabuhanga</a></li>
@@ -55,7 +55,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-xs text-slate-400">
               <li>
                 <button onClick={() => setActiveRole('seller')} className="hover:text-emerald-400 text-left transition-colors font-semibold text-emerald-400">
-                  + Fungura iduka ryawe ku Isoko
+                  + Fungura iduka ryawe ku Nexora
                 </button>
               </li>
               <li><a href="#" className="hover:text-emerald-400 transition-colors">Dashboard y'Amaduka</a></li>

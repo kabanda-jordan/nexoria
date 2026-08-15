@@ -5,21 +5,19 @@
 [![Live Demo](https://img.shields.io/badge/demo-nexora.rw-0E8F5B?style=for-the-badge&logo=vercel)](https://nexora.rw)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19-61dafb?style=for-the-badge&logo=react)](https://react.dev/)
+[![React](https://img.shields.io/badge/React-18-61dafb?style=for-the-badge&logo=react)](https://react.dev/)
 
 ---
 
 ## ✨ Features
 
-- 🏪 **Multi-Vendor Marketplace** — 50+ Rwandan merchant shops, 2,000+ product listings
-- 💚 **MTN Mobile Money & Airtel Money** — *182# USSD push simulation with PIN confirmation
+- 🏪 **Multi-Vendor Marketplace** — 50+ Rwandan merchant shops, 2,050+ product listings (seed data)
+- 💚 **MTN Mobile Money & Airtel Money** — `*182#` USSD push simulation with PIN confirmation
 - 📍 **Rwanda 3-Tier Location** — District → Sector → Cell address selection
 - 🔐 **Resend API Email Verification** — 6-digit OTP code sent to real email addresses
 - 🤖 **Anti-Bot Captcha** — Human verification on login and registration
 - 📋 **Terms & Conditions** — Mandatory Rwanda e-commerce compliance agreement
 - 🌍 **Trilingual** — Kinyarwanda (`rw`), English (`en`), French (`fr`)
-- 🛡️ **Bcrypt 12-Round Hashing** — Zero plain-text password storage
-- 🔑 **JWT + HttpOnly Cookies** — Access Token (15 min) + Refresh Token (7 days) anti-XSS/CSRF
 - 📊 **Swagger UI API Docs** — Interactive REST API testing at `/api/docs`
 - 👤 Buyer, Seller, and Admin dashboards
 
@@ -37,9 +35,9 @@ npm install
 
 # Set environment variables
 cp .env.example .env
-# Edit .env and add your VITE_RESEND_API_KEY
+# Edit .env and add your VITE_RESEND_API_KEY (get yours at https://resend.com)
 
-# Start the backend API + Swagger UI server
+# Start the mock REST API + Swagger UI server
 node server.js
 
 # In a new terminal — start the frontend dev server
@@ -49,26 +47,28 @@ npm run dev
 - **Frontend**: http://localhost:3000
 - **Swagger UI API Docs**: http://localhost:3001/api/docs
 
+> **Note:** This repository is the **frontend product build** with a lightweight Node.js mock API server (`server.js`) that serves seeded catalog data and proxies the Resend email API. No database is required to run it.
+
 ---
 
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 19 + Vite + TypeScript |
+| Frontend | React 18 + Vite + TypeScript |
 | Styling | Tailwind CSS + Framer Motion |
 | State | Zustand |
-| Database | PostgreSQL + Prisma ORM |
-| Search | Meilisearch |
-| Cache / Queue | Redis + BullMQ |
+| Mock API | Node.js (`server.js`) + OpenAPI 3.0 (Swagger UI) |
 | Email | Resend API |
-| Backend | Node.js (server.js) → NestJS (production) |
-| API Docs | Swagger UI + OpenAPI 3.0 |
+| Data Model | Prisma schema (`prisma/schema.prisma`) |
+| Production Backend | NestJS module stubs (`backend/`) |
 | Deployment | Docker + Docker Compose |
+
+Planned production infrastructure (defined in `docker-compose.yml` & `.env.example`, not required for the demo): PostgreSQL, Redis, Meilisearch.
 
 ---
 
-## 📡 REST API Endpoints
+## 📡 REST API Endpoints (Mock Server)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -78,11 +78,11 @@ npm run dev
 | `GET` | `/api/v1/products` | 2,050+ products with pagination & filters |
 | `POST` | `/api/v1/products` | Add new product listing (Seller) |
 | `GET` | `/api/v1/shops` | 50+ Rwandan merchant shops |
-| `GET` | `/api/v1/categories` | Category taxonomy (RW/EN/FR) |
-| `GET` | `/api/v1/orders` | List orders |
-| `POST` | `/api/v1/orders` | Create order + MTN MoMo trigger |
+| `GET/POST` | `/api/v1/categories` | Category taxonomy (RW/EN/FR) |
+| `GET/POST` | `/api/v1/orders` | List / create orders + MTN MoMo trigger |
 | `GET/POST` | `/api/v1/payouts` | Vendor payout requests |
 | `GET` | `/api/v1/disputes` | Customer disputes (Admin) |
+| `GET` | `/api/v1/hero-slides` | Homepage hero slides |
 | `POST` | `/api/send-otp` | Resend API OTP email dispatch |
 
 ---
@@ -95,10 +95,10 @@ nexoria/
 │   ├── favicon.svg          # Geometric N app icon
 │   └── logo.svg             # Full horizontal wordmark
 ├── prisma/
-│   └── schema.prisma        # PostgreSQL Prisma schema
+│   └── schema.prisma        # PostgreSQL Prisma schema (production model)
 ├── backend/
-│   └── src/modules/auth/    # NestJS Auth (bcrypt, JWT, DTOs)
-├── server.js                # Node.js REST API + Swagger UI proxy
+│   └── src/modules/auth/    # NestJS Auth design (bcrypt, JWT, DTOs)
+├── server.js                # Mock REST API + Resend proxy + Swagger UI
 ├── src/
 │   ├── components/
 │   │   ├── auth/            # AuthModal, CaptchaBox, TermsModal
@@ -116,14 +116,11 @@ nexoria/
 
 ---
 
-## 🔐 Security Architecture
+## 🔐 Security Notes
 
-- **Bcrypt 12-Round** password hashing — zero plain-text storage
-- **JWT Access Token** (15 min) + **HttpOnly SameSite=Strict Refresh Token** (7 days)
-- **Rate limiting** — 5 login attempts per 60 seconds per IP
-- **Cloudflare Turnstile** anti-bot captcha on all auth endpoints
-- **Prisma prepared statements** — SQL Injection prevention
-- **Class-Validator DTOs** — Rwanda phone regex, password complexity enforcement
+- The Resend API key is read from `.env` (`VITE_RESEND_API_KEY`), with a fallback bundled in `server.js` for the demo. `.env` is gitignored.
+- The demo's auth flow runs entirely in-browser against the mock API and does **not** persist credentials.
+- The `backend/` folder documents the **production security architecture** (Bcrypt 12-round hashing, JWT + HttpOnly cookies, Cloudflare Turnstile, rate limiting) as a blueprint for the full-stack rollout — see [`backend/README.md`](backend/README.md).
 
 ---
 

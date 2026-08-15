@@ -10,7 +10,7 @@ interface WishlistState {
 }
 
 export const useWishlistStore = create<WishlistState>((set, get) => ({
-  wishlistIds: ['prod-1', 'prod-4'], // pre-populated with demo items
+  wishlistIds: [],
   isWishlistOpen: false,
   openWishlist: () => set({ isWishlistOpen: true }),
   closeWishlist: () => set({ isWishlistOpen: false }),

@@ -110,7 +110,7 @@ function generateBackendProducts() {
       description: `${t.desc} Sold directly by ${shop.name} in ${shop.district}, Rwanda. Guaranteed fast delivery.`,
       price,
       original_price: Math.random() > 0.6 ? Math.round((price * 1.2) / 500) * 500 : undefined,
-      sku: `ISK-SKU-${10000 + i}`,
+      sku: `NXR-SKU-${10000 + i}`,
       stock: Math.floor(5 + Math.random() * 85),
       status: 'active',
       images: [t.img, "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop"],
