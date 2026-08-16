@@ -74,7 +74,7 @@ export const HeroCarousel: React.FC = () => {
               onClick={() => {
                 if (slide.category_slug) setSelectedCategorySlug(slide.category_slug);
               }}
-              className={`relative w-full shrink-0 h-[300px] sm:h-[360px] lg:h-[420px] ${
+              className={`relative w-full shrink-0 h-[420px] sm:h-[500px] lg:h-[560px] ${
                 slide.category_slug ? 'cursor-pointer' : ''
               }`}
             >
