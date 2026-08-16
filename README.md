@@ -78,6 +78,26 @@ docker run -p 8080:3001 nexora-rwanda-marketplace
 
 ---
 
+## ☁️ Cloudflare Pages Deployment
+
+The frontend is fully static (all data ships from client-side seed stores), so it deploys straight to Cloudflare Pages with free global hosting and HTTPS. The only backend piece — OTP emails — is re-implemented as a **Cloudflare Pages Function** in `functions/api/send-otp.ts` (server-side, so your Resend key never leaks into the browser bundle).
+
+**Live at: https://nexorarwanda.pages.dev**
+
+```bash
+# One-command deploy (builds then uploads)
+npm run deploy:pages
+
+# First time only: set the Resend key (used by the OTP function)
+npx wrangler pages secret put RESEND_API_KEY --project-name nexorarwanda
+```
+
+- SPA fallback is handled by `public/_redirects` (`/* → /index.html`), so any route serves the app.
+- Set `RESEND_API_KEY` as a project secret in the dashboard (Settings → Environment variables) or via `wrangler pages secret put`.
+- Requires `npx wrangler login` once (or `CLOUDFLARE_API_TOKEN`).
+
+---
+
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
@@ -145,7 +165,7 @@ nexoria/
 
 ## 🔐 Security Notes
 
-- The Resend API key is read from `.env` (`VITE_RESEND_API_KEY`), with a fallback bundled in `server.js` for the demo. `.env` is gitignored.
+- The Resend API key is read from `.env` (`VITE_RESEND_API_KEY`), with a fallback bundled in `server.js` for the demo. `.env` is gitignored. On Cloudflare Pages the key lives only as the `RESEND_API_KEY` project secret, never in the client bundle.
 - The demo's auth flow runs entirely in-browser against the mock API and does **not** persist credentials.
 - The `backend/` folder documents the **production security architecture** (Bcrypt 12-round hashing, JWT + HttpOnly cookies, Cloudflare Turnstile, rate limiting) as a blueprint for the full-stack rollout — see [`backend/README.md`](backend/README.md).
 
