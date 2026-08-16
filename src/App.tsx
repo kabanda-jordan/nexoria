@@ -36,8 +36,30 @@ export function App() {
 
   useEffect(() => {
     const onPop = () => setPath(getPath());
+    const syncModalWithUrl = () => {
+      const p = getPath();
+      const { isAuthModalOpen, authMode, openAuthModal, closeAuthModal, setAuthMode } = useAuthStore.getState();
+      const isLogin = p === '/login';
+      const isRegister = p === '/register';
+      if (isLogin || isRegister) {
+        if (!isAuthModalOpen) {
+          openAuthModal(isLogin ? 'login' : 'signup');
+        } else if (isLogin && authMode !== 'login') {
+          setAuthMode('login');
+        } else if (isRegister && authMode === 'login') {
+          setAuthMode('signup');
+        }
+      } else if (isAuthModalOpen) {
+        closeAuthModal();
+      }
+    };
     window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
+    window.addEventListener('popstate', syncModalWithUrl);
+    syncModalWithUrl();
+    return () => {
+      window.removeEventListener('popstate', onPop);
+      window.removeEventListener('popstate', syncModalWithUrl);
+    };
   }, []);
 
   const route = parsePath(path);

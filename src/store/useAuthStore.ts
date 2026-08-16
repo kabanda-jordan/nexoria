@@ -1,11 +1,25 @@
 import { create } from 'zustand';
 import { User, UserRole } from '../types';
 import { api, AuthUser } from '../services/api';
+import { navigate, getPath } from '../lib/navigate';
 
 export type AuthMode = 'login' | 'signup' | 'verify';
 
 const TOKEN_KEY = 'nexora_token';
 const USER_KEY = 'nexora_user';
+
+const authPath = (mode: AuthMode): string => {
+  if (mode === 'login') return '/login';
+  return '/register';
+};
+
+const leaveAuthPath = () => {
+  const p = getPath();
+  if (p === '/login' || p === '/register') {
+    window.history.replaceState({}, '', '/');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }
+};
 
 const toUser = (u: AuthUser): User => ({
   id: u.id,
@@ -71,9 +85,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isSendingResend: false,
   resendCountdown: 0,
 
-  openAuthModal: (mode = 'login') => set({ isAuthModalOpen: true, authMode: mode }),
-  closeAuthModal: () => set({ isAuthModalOpen: false }),
-  setAuthMode: (mode: AuthMode) => set({ authMode: mode }),
+  openAuthModal: (mode = 'login') => {
+    const wasOpen = get().isAuthModalOpen;
+    set({ isAuthModalOpen: true, authMode: mode });
+    if (!wasOpen) navigate(authPath(mode));
+  },
+  closeAuthModal: () => {
+    set({ isAuthModalOpen: false });
+    leaveAuthPath();
+  },
+  setAuthMode: (mode) => {
+    set({ authMode: mode });
+    if (get().isAuthModalOpen) navigate(authPath(mode));
+  },
   setActiveRole: (role: UserRole) => set({ activeRole: role }),
 
   login: async (email, password) => {
@@ -87,6 +111,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         activeRole: user.role,
         isAuthModalOpen: false,
       });
+      leaveAuthPath();
       return { success: true, message: `Welcome back, ${user.name}!` };
     } catch (e: any) {
       return { success: false, message: e.message || 'Login failed. Please try again.' };
@@ -156,6 +181,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         verificationId: null,
         resendCountdown: 0,
       });
+      leaveAuthPath();
       return { success: true, message: 'Account verified and created. Welcome to Nexora!' };
     } catch (e: any) {
       return { success: false, message: e.message || 'Verification failed. Please try again.' };
