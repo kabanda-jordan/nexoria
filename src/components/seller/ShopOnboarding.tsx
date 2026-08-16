@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Store, MapPin, Phone, MessageSquare, FileText, Image as ImageIcon, ArrowRight, Loader2, ShieldCheck } from 'lucide-react';
+import { Store, MapPin, Phone, MessageSquare, FileText, ArrowRight, Loader2, ShieldCheck } from 'lucide-react';
 import { useShopStore } from '../../store/useShopStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useToastStore } from '../../store/useToastStore';
-import { CloudinaryUpload } from '../ui/CloudinaryUpload';
+import { CloudinaryUpload, CLOUDINARY_ENABLED } from '../ui/CloudinaryUpload';
 import { RWANDA_LOCATIONS } from '../../data/rwandaLocations';
 
 export const ShopOnboarding: React.FC = () => {
@@ -194,45 +194,41 @@ export const ShopOnboarding: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Logo Image URL</label>
-                <div className="relative flex items-center">
-                  <ImageIcon className="w-4 h-4 text-slate-400 absolute left-3.5" />
-                  <input
-                    type="url"
-                    value={logoUrl}
-                    onChange={(e) => setLogoUrl(e.target.value)}
-                    placeholder="https://images.unsplash.com/..."
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-emerald-500"
-                  />
-                </div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Shop Logo</label>
                 <CloudinaryUpload
                   onUpload={(url) => setLogoUrl(url)}
-                  label="Upload Logo"
+                  label="Upload Logo from PC"
                   hint="Square image works best"
-                  className="mt-2"
                 />
+                {logoUrl && (
+                  <div className="mt-2 w-20 h-20 rounded-xl overflow-hidden ring-2 ring-emerald-500">
+                    <img src={logoUrl} alt="Shop logo preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Banner Image URL</label>
-                <div className="relative flex items-center">
-                  <ImageIcon className="w-4 h-4 text-slate-400 absolute left-3.5" />
-                  <input
-                    type="url"
-                    value={bannerUrl}
-                    onChange={(e) => setBannerUrl(e.target.value)}
-                    placeholder="https://images.unsplash.com/..."
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-emerald-500"
-                  />
-                </div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Shop Banner</label>
                 <CloudinaryUpload
                   onUpload={(url) => setBannerUrl(url)}
-                  label="Upload Banner"
+                  label="Upload Banner from PC"
                   hint="Wide banner, e.g. 1200×400"
-                  className="mt-2"
                 />
+                {bannerUrl && (
+                  <div className="mt-2 w-full h-20 rounded-xl overflow-hidden ring-2 ring-emerald-500">
+                    <img src={bannerUrl} alt="Shop banner preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
               </div>
             </div>
+
+            {!CLOUDINARY_ENABLED && (
+              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs leading-relaxed">
+                Image upload needs Cloudinary configured. Set{' '}
+                <span className="font-mono font-bold">VITE_CLOUDINARY_CLOUD_NAME</span> and{' '}
+                <span className="font-mono font-bold">VITE_CLOUDINARY_UPLOAD_PRESET</span> in your .env file, then rebuild.
+              </div>
+            )}
 
             <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-start gap-2.5">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
