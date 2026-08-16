@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Order, OrderStatus, PaymentMethod } from '../types';
 import { INITIAL_ORDERS } from '../data/seed';
+import { api } from '../services/api';
 
 interface OrderState {
   orders: Order[];
@@ -8,14 +9,14 @@ interface OrderState {
   isCheckoutOpen: boolean;
   isMoMoModalOpen: boolean;
   pendingMoMoOrder: Order | null;
-  
+
   // Actions
   openCheckout: () => void;
   closeCheckout: () => void;
   openMoMoModal: (order: Order) => void;
   closeMoMoModal: () => void;
   setActiveTrackingOrder: (order: Order | null) => void;
-  
+
   createOrder: (orderData: Omit<Order, 'id' | 'created_at' | 'updated_at' | 'tracking_code'>) => Order;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
 }
@@ -41,17 +42,43 @@ export const useOrderStore = create<OrderState>((set, get) => ({
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
-    
+
     set((state) => ({
       orders: [newOrder, ...state.orders],
       activeTrackingOrder: newOrder,
     }));
 
+    api
+      .createOrder(newOrder)
+      .then(({ order }) => {
+        set((state) => ({
+          orders: state.orders.map((o) => (o.id === newOrder.id ? { ...o, ...order } : o)),
+          activeTrackingOrder:
+            state.activeTrackingOrder?.id === newOrder.id
+              ? { ...state.activeTrackingOrder, ...order }
+              : state.activeTrackingOrder,
+        }));
+      })
+      .catch((e) => console.warn('[api] create order failed, order kept locally', e));
+
     return newOrder;
   },
 
-  updateOrderStatus: (orderId, status) => set((state) => ({
-    orders: state.orders.map((o) => (o.id === orderId ? { ...o, status, updated_at: new Date().toISOString() } : o)),
-    activeTrackingOrder: state.activeTrackingOrder?.id === orderId ? { ...state.activeTrackingOrder, status, updated_at: new Date().toISOString() } : state.activeTrackingOrder,
-  })),
+  updateOrderStatus: (orderId, status) => {
+    set((state) => ({
+      orders: state.orders.map((o) => (o.id === orderId ? { ...o, status, updated_at: new Date().toISOString() } : o)),
+      activeTrackingOrder: state.activeTrackingOrder?.id === orderId ? { ...state.activeTrackingOrder, status, updated_at: new Date().toISOString() } : state.activeTrackingOrder,
+    }));
+    api.updateOrderStatus(orderId, status).catch((e) => console.warn('[api] update order status failed', e));
+  },
 }));
+
+// Hydrate orders from the live D1-backed API.
+(async () => {
+  try {
+    const res = await api.getOrders();
+    useOrderStore.setState({ orders: res.orders });
+  } catch (e) {
+    console.warn('[api] order hydrate failed, using local seed data', e);
+  }
+})();

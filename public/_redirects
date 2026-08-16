@@ -1,2 +1,2 @@
-/* SPA fallback: serve index.html for any non-API route */
-/*    /index.html 200
+# SPA fallback: serve index.html for any non-API route
+/*  /index.html  200

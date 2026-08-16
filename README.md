@@ -78,23 +78,30 @@ docker run -p 8080:3001 nexora-rwanda-marketplace
 
 ---
 
-## ☁️ Cloudflare Pages Deployment
+## ☁️ Cloudflare Pages Deployment (Live Backend)
 
-The frontend is fully static (all data ships from client-side seed stores), so it deploys straight to Cloudflare Pages with free global hosting and HTTPS. The only backend piece — OTP emails — is re-implemented as a **Cloudflare Pages Function** in `functions/api/send-otp.ts` (server-side, so your Resend key never leaks into the browser bundle).
+The production deployment runs on **Cloudflare Pages** with a real backend: catalog, shops, orders, payouts and disputes are stored in **Cloudflare D1** (SQLite at the edge) and exposed through **Pages Functions** (`functions/api/v1/*`). The frontend hydrate from `/api/v1/*` at boot and falls back to the bundled client-side seed data if the API is unreachable.
 
 **Live at: https://nexorarwanda.pages.dev**
 
 ```bash
-# One-command deploy (builds then uploads)
+# One-command deploy (builds then uploads, promotes to the `main` branch)
 npm run deploy:pages
 
 # First time only: set the Resend key (used by the OTP function)
 npx wrangler pages secret put RESEND_API_KEY --project-name nexorarwanda
+
+# Re-seed the remote D1 database (generates seed.sql, then executes it)
+npm run db:seed
+# or step by step:
+npm run seed:d1            # writes ./seed.sql
+npx wrangler d1 execute nexora-db --remote --file=seed.sql
 ```
 
-- SPA fallback is handled by `public/_redirects` (`/* → /index.html`), so any route serves the app.
+- The D1 binding (`DB`) is wired in `wrangler.toml` (`nexora-db` database). Schema + seed SQL is generated from `src/data/seed.ts` by `scripts/seed-d1.ts`.
+- SPA fallback is handled by `public/_redirects` (`/* → /index.html`), so any route serves the app while `/api/*` runs the Functions.
 - Set `RESEND_API_KEY` as a project secret in the dashboard (Settings → Environment variables) or via `wrangler pages secret put`.
-- Requires `npx wrangler login` once (or `CLOUDFLARE_API_TOKEN`).
+- Requires `npx wrangler login` once (or `CLOUDFLARE_API_TOKEN`). Deploys must pass `--branch main` so the `*.pages.dev` alias updates (the project's production branch is `main`).
 
 ---
 
@@ -106,16 +113,20 @@ npx wrangler pages secret put RESEND_API_KEY --project-name nexorarwanda
 | Styling | Tailwind CSS + Framer Motion |
 | State | Zustand |
 | Mock API | Node.js (`server.js`) + OpenAPI 3.0 (Swagger UI) |
+| Production Backend | Cloudflare Pages Functions (`functions/api/v1/*`) |
+| Production Database | Cloudflare D1 (SQLite at the edge, `nexora-db`) |
 | Email | Resend API |
 | Data Model | Prisma schema (`prisma/schema.prisma`) |
-| Production Backend | NestJS module stubs (`backend/`) |
-| Deployment | Docker + Docker Compose |
+| NestJS blueprint | `backend/` (bcrypt, JWT, DTOs — production architecture) |
+| Deployment | Cloudflare Pages + Docker Compose (demo container) |
 
 Planned production infrastructure (defined in `docker-compose.yml` & `.env.example`, not required for the demo): PostgreSQL, Redis, Meilisearch.
 
 ---
 
-## 📡 REST API Endpoints (Mock Server)
+## 📡 REST API Endpoints
+
+Implemented twice with identical shapes — the lightweight mock (`server.js`, local dev) and the **live Pages Functions backed by D1** (`https://nexorarwanda.pages.dev/api/v1/*`).
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -124,12 +135,17 @@ Planned production infrastructure (defined in `docker-compose.yml` & `.env.examp
 | `GET` | `/api/v1/users` | List all platform users (Admin) |
 | `GET` | `/api/v1/products` | 2,050+ products with pagination & filters |
 | `POST` | `/api/v1/products` | Add new product listing (Seller) |
+| `GET/PATCH/DELETE` | `/api/v1/products/:id` | Detail / edit / remove a product |
 | `GET` | `/api/v1/shops` | 50+ Rwandan merchant shops |
+| `GET/PATCH` | `/api/v1/shops/:id` | Shop detail / admin approval & suspension |
 | `GET/POST` | `/api/v1/categories` | Category taxonomy (RW/EN/FR) |
 | `GET/POST` | `/api/v1/orders` | List / create orders + MTN MoMo trigger |
+| `GET/PATCH` | `/api/v1/orders/:id` | Order detail / status & payment updates |
 | `GET/POST` | `/api/v1/payouts` | Vendor payout requests |
 | `GET` | `/api/v1/disputes` | Customer disputes (Admin) |
-| `GET` | `/api/v1/hero-slides` | Homepage hero slides |
+| `PATCH` | `/api/v1/disputes/:id` | Resolve a dispute |
+| `GET/POST` | `/api/v1/hero-slides` | Homepage hero slides |
+| `PATCH` | `/api/v1/hero-slides/:id` | Edit a hero slide (CMS) |
 | `POST` | `/api/send-otp` | Resend API OTP email dispatch |
 
 ---
@@ -140,7 +156,17 @@ Planned production infrastructure (defined in `docker-compose.yml` & `.env.examp
 nexoria/
 ├── public/
 │   ├── favicon.svg          # Geometric N app icon
-│   └── logo.svg             # Full horizontal wordmark
+│   ├── logo.svg             # Full horizontal wordmark
+│   └── _redirects           # SPA fallback (/* → /index.html)
+├── functions/
+│   └── api/
+│       ├── v1/              # Live D1-backed API (categories, hero-slides, shops, products, orders, payouts, disputes)
+│       └── send-otp.ts      # Resend OTP email function
+├── shared/
+│   └── db.ts                # Shared Env types, JSON helpers, row → DTO mappers
+├── scripts/
+│   └── seed-d1.ts           # Generates ./seed.sql from src/data/seed.ts
+├── wrangler.toml            # Pages + D1 (`nexora-db`) binding
 ├── prisma/
 │   └── schema.prisma        # PostgreSQL Prisma schema (production model)
 ├── backend/
@@ -153,8 +179,9 @@ nexoria/
 │   │   ├── buyer/           # ProductGrid, CartDrawer, Checkout, MoMo
 │   │   ├── seller/          # SellerDashboard, ShopStorefront
 │   │   └── admin/           # AdminDashboard
-│   ├── store/               # Zustand state stores
-│   ├── services/            # Resend API email service
+│   ├── store/               # Zustand state stores (hydrate from /api/v1/*)
+│   ├── services/
+│   │   └── api.ts           # Typed API client for /api/v1/*
 │   ├── data/                # Seed engine + Rwanda locations
 │   └── i18n/                # RW / EN / FR translations
 ├── docker-compose.yml

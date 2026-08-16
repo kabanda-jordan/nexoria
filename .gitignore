@@ -36,6 +36,12 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 
+# Cloudflare local dev state
+.wrangler/
+
+# Generated D1 seed SQL
+seed.sql
+
 # Docker volumes
 .docker/
 

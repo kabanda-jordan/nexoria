@@ -8,7 +8,9 @@
     "build": "tsc && vite build",
     "lint": "tsc --noEmit",
     "preview": "vite preview",
-    "deploy:pages": "npm run build && wrangler pages deploy dist --project-name nexorarwanda"
+    "seed:d1": "tsx scripts/seed-d1.ts",
+    "db:seed": "npm run seed:d1 && wrangler d1 execute nexora-db --remote --file=seed.sql",
+    "deploy:pages": "npm run build && wrangler pages deploy dist --project-name nexorarwanda --branch main"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -27,6 +29,7 @@
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
+    "tsx": "^4.23.12",
     "typescript": "^5.6.3",
     "vite": "^5.4.11",
     "wrangler": "^3.114.0"
