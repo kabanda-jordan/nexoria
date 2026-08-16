@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mail, Lock, Phone, User as UserIcon, ShieldCheck, ArrowRight, CheckCircle2, RefreshCw, KeyRound, AlertCircle, Info } from 'lucide-react';
+import { X, Mail, Lock, Phone, User as UserIcon, ArrowRight, RefreshCw, KeyRound } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useToastStore } from '../../store/useToastStore';
 import { CaptchaBox } from './CaptchaBox';
@@ -19,8 +19,6 @@ export const AuthModal: React.FC = () => {
     verifyEmailCode,
     resendVerificationCode,
     pendingUser,
-    pendingVerificationCode,
-    resendApiNotice,
     isSendingResend,
     resendCountdown,
   } = useAuthStore();
@@ -49,7 +47,7 @@ export const AuthModal: React.FC = () => {
 
   if (!isAuthModalOpen) return null;
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!isCaptchaVerified) {
@@ -57,8 +55,12 @@ export const AuthModal: React.FC = () => {
       return;
     }
 
-    login(loginName, loginIdentifier, loginPassword);
-    addToast('Welcome back to Nexora! 👋', `Logged in as ${loginName.trim() || loginIdentifier}`);
+    const res = await login(loginName, loginIdentifier, loginPassword);
+    if (res.success) {
+      addToast('Welcome back to Nexora! 👋', res.message);
+    } else {
+      addToast('Login Failed', res.message, 'error');
+    }
   };
 
   const handleSignupSubmit = async (e: React.FormEvent) => {
@@ -75,7 +77,11 @@ export const AuthModal: React.FC = () => {
     }
 
     const res = await startSignup(signupName, signupEmail, signupPhone, signupRole, signupPassword);
-    addToast('Verification Triggered! ✉️', res.message, 'info');
+    if (res.success) {
+      addToast('Verification Code Sent! ✉️', res.message, 'info');
+    } else {
+      addToast('Registration Failed', res.message, 'error');
+    }
   };
 
   const handleOtpChange = (index: number, value: string) => {
@@ -96,7 +102,7 @@ export const AuthModal: React.FC = () => {
     }
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     const enteredCode = otpDigits.join('');
 
@@ -105,11 +111,11 @@ export const AuthModal: React.FC = () => {
       return;
     }
 
-    const verified = verifyEmailCode(enteredCode);
-    if (verified) {
-      addToast('Account Verified & Created! 🎉', 'Welcome to Nexora Rwanda Marketplace.');
+    const res = await verifyEmailCode(enteredCode);
+    if (res.success) {
+      addToast('Account Verified & Created! 🎉', res.message);
     } else {
-      addToast('Invalid Verification Code', 'The code you entered is incorrect. Please check your inbox and try again.', 'error');
+      addToast('Verification Failed', res.message, 'error');
     }
   };
 
@@ -340,21 +346,10 @@ export const AuthModal: React.FC = () => {
                 <div>
                   <h4 className="font-extrabold text-base text-slate-900">Email Verification Code</h4>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Resend API verification code for{' '}
+                    Enter the 6-digit verification code sent to{' '}
                     <span className="font-bold text-emerald-600">{pendingUser.email}</span>:
                   </p>
                 </div>
-
-                {/* Resend Free Tier Notice Banner if applicable */}
-                {resendApiNotice && (
-                  <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] text-left flex items-start gap-2.5">
-                    <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold block">Resend API Key Status:</span>
-                      <span className="opacity-90">{resendApiNotice}</span>
-                    </div>
-                  </div>
-                )}
 
                 {/* 6 Individual Code Inputs */}
                 <div className="flex justify-center gap-2 my-4">
@@ -371,12 +366,6 @@ export const AuthModal: React.FC = () => {
                     />
                   ))}
                 </div>
-
-                {pendingVerificationCode && (
-                  <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
-                    🔑 Verification Code: <span className="font-mono text-base text-emerald-700 tracking-wider ml-1">{pendingVerificationCode}</span>
-                  </div>
-                )}
 
                 <div className="flex items-center justify-between text-xs pt-1">
                   <button

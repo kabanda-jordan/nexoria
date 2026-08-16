@@ -14,7 +14,7 @@
 - 🏪 **Multi-Vendor Marketplace** — 50+ Rwandan merchant shops, 2,050+ product listings (seed data)
 - 💚 **MTN Mobile Money & Airtel Money** — `*182#` USSD push simulation with PIN confirmation
 - 📍 **Rwanda 3-Tier Location** — District → Sector → Cell address selection
-- 🔐 **Resend API Email Verification** — 6-digit OTP code sent to real email addresses
+- 🔐 **Email verification** — 6-digit OTP is generated server-side and delivered by Resend; it is **never shown in the browser**. Accounts and sessions are stored in D1 (PBKDF2 password hashing, duplicate-email detection, session restore).
 - 🤖 **Anti-Bot Captcha** — Human verification on login and registration
 - 📋 **Terms & Conditions** — Mandatory Rwanda e-commerce compliance agreement
 - 🌍 **Trilingual** — Kinyarwanda (`rw`), English (`en`), French (`fr`)
@@ -84,6 +84,15 @@ The production deployment runs on **Cloudflare Pages** with a real backend: cata
 
 **Live at: https://nexorarwanda.pages.dev**
 
+**Demo accounts** (seeded into D1):
+
+| Role | Email | Password |
+|------|-------|----------|
+| Buyer | `demo@nexora.rw` | `demo1234` |
+| Seller | `seller@nexora.rw` | `demo1234` |
+
+> **Resend sandbox note:** the test sender (`onboarding@resend.dev`) only delivers to the Resend account owner's email. New signups from other addresses are blocked with a clear error until you verify a custom domain (Resend → Domains → Add Domain) and set a verified `from` address in `shared/auth.ts`.
+
 ```bash
 # One-command deploy (builds then uploads, promotes to the `main` branch)
 npm run deploy:pages
@@ -130,8 +139,10 @@ Implemented twice with identical shapes — the lightweight mock (`server.js`, l
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/v1/auth/register` | Register buyer or seller account |
-| `POST` | `/api/v1/auth/login` | Login + JWT token issuance |
+| `POST` | `/api/v1/auth/register` | Start registration: checks email/phone uniqueness, sends OTP email, returns `verificationId` |
+| `POST` | `/api/v1/auth/verify` | Complete registration: checks the emailed code, creates the account + session |
+| `POST` | `/api/v1/auth/login` | Login with email/phone + password → user + session token |
+| `GET` | `/api/v1/auth/me` | Validate session token (`Authorization: Bearer …`) → current user |
 | `GET` | `/api/v1/users` | List all platform users (Admin) |
 | `GET` | `/api/v1/products` | 2,050+ products with pagination & filters |
 | `POST` | `/api/v1/products` | Add new product listing (Seller) |
@@ -160,10 +171,11 @@ nexoria/
 │   └── _redirects           # SPA fallback (/* → /index.html)
 ├── functions/
 │   └── api/
-│       ├── v1/              # Live D1-backed API (categories, hero-slides, shops, products, orders, payouts, disputes)
-│       └── send-otp.ts      # Resend OTP email function
+│       ├── v1/              # Live D1-backed API (auth, categories, hero-slides, shops, products, orders, payouts, disputes)
+│       └── send-otp.ts      # Resend OTP email function (legacy)
 ├── shared/
-│   └── db.ts                # Shared Env types, JSON helpers, row → DTO mappers
+│   ├── db.ts                # Shared Env types, JSON helpers, row → DTO mappers
+│   └── auth.ts              # PBKDF2 hashing, OTP generation, Resend email send
 ├── scripts/
 │   └── seed-d1.ts           # Generates ./seed.sql from src/data/seed.ts
 ├── wrangler.toml            # Pages + D1 (`nexora-db`) binding
@@ -192,9 +204,11 @@ nexoria/
 
 ## 🔐 Security Notes
 
-- The Resend API key is read from `.env` (`VITE_RESEND_API_KEY`), with a fallback bundled in `server.js` for the demo. `.env` is gitignored. On Cloudflare Pages the key lives only as the `RESEND_API_KEY` project secret, never in the client bundle.
-- The demo's auth flow runs entirely in-browser against the mock API and does **not** persist credentials.
-- The `backend/` folder documents the **production security architecture** (Bcrypt 12-round hashing, JWT + HttpOnly cookies, Cloudflare Turnstile, rate limiting) as a blueprint for the full-stack rollout — see [`backend/README.md`](backend/README.md).
+- Verification codes are **generated server-side** (in `functions/api/v1/auth/register.ts`), stored in D1 with a 10-minute expiry, and never returned to the browser — they only reach the user's inbox.
+- Passwords are hashed with **PBKDF2-SHA256** (100k iterations, random per-user salt) via `shared/auth.ts`. Login verifies the hash against the `users` table in D1; duplicate email/phone registrations are rejected with `409`.
+- Sessions are opaque random tokens stored in the D1 `sessions` table (30-day expiry); the client keeps them in `localStorage` and re-validates on load via `/api/v1/auth/me`.
+- The Resend API key is read from the `RESEND_API_KEY` Pages secret only, never from the client bundle. `.env` is gitignored.
+- The `backend/` folder documents the full production security architecture (Bcrypt, JWT + HttpOnly cookies, Cloudflare Turnstile, rate limiting) as a blueprint — see [`backend/README.md`](backend/README.md).
 
 ---
 

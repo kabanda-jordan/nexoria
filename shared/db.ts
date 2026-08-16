@@ -27,6 +27,17 @@ const parseJson = (v: unknown, fallback: unknown = null) => {
 const optional = (v: unknown) => (v === null || v === undefined ? undefined : String(v));
 const toBool = (v: unknown) => Boolean(v);
 
+export const mapUser = (r: any) => ({
+  id: r.id,
+  name: r.name,
+  email: r.email,
+  phone: r.phone,
+  role: r.role,
+  locale: r.locale,
+  avatar_url: optional(r.avatar_url),
+  verified_at: optional(r.verified_at),
+});
+
 export const mapCategory = (r: any) => ({
   id: r.id,
   name_rw: r.name_rw,

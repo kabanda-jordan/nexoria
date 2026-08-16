@@ -1,6 +1,7 @@
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import { pbkdf2Sync, randomBytes } from 'node:crypto';
 import {
   INITIAL_CATEGORIES,
   INITIAL_HERO_SLIDES,
@@ -72,8 +73,26 @@ sql(`CREATE TABLE IF NOT EXISTS disputes (
   id TEXT PRIMARY KEY, order_id TEXT, buyer_name TEXT, shop_name TEXT,
   reason TEXT, status TEXT, amount INTEGER, created_at TEXT
 );`);
+sql(`CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL UNIQUE,
+  phone TEXT NOT NULL UNIQUE, role TEXT NOT NULL DEFAULT 'buyer',
+  password_salt TEXT NOT NULL, password_hash TEXT NOT NULL,
+  locale TEXT NOT NULL DEFAULT 'rw', avatar_url TEXT,
+  verified_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+);`);
+sql(`CREATE TABLE IF NOT EXISTS sessions (
+  token TEXT PRIMARY KEY, user_id TEXT NOT NULL,
+  expires_at TEXT NOT NULL, created_at TEXT NOT NULL
+);`);
+sql(`CREATE TABLE IF NOT EXISTS pending_registrations (
+  id TEXT PRIMARY KEY, email TEXT NOT NULL, code TEXT NOT NULL,
+  name TEXT NOT NULL, phone TEXT NOT NULL, role TEXT NOT NULL,
+  password_salt TEXT NOT NULL, password_hash TEXT NOT NULL,
+  locale TEXT NOT NULL DEFAULT 'rw', expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);`);
 
-['categories', 'hero_slides', 'shops', 'products', 'orders', 'payouts', 'disputes'].forEach((t) =>
+['categories', 'hero_slides', 'shops', 'products', 'orders', 'payouts', 'disputes', 'users', 'sessions', 'pending_registrations'].forEach((t) =>
   sql(`DELETE FROM ${t};`)
 );
 
@@ -231,6 +250,30 @@ const disputeRows = INITIAL_DISPUTES.map((d) => [
   q(d.created_at),
 ]);
 insertBatch('disputes', ['id', 'order_id', 'buyer_name', 'shop_name', 'reason', 'status', 'amount', 'created_at'], disputeRows);
+
+const demoUsers = [
+  {
+    id: 'usr-demo-buyer',
+    name: 'Jean-Luc Rutaremara',
+    email: 'demo@nexora.rw',
+    phone: '+250 788 123 456',
+    role: 'buyer',
+  },
+  {
+    id: 'usr-demo-seller',
+    name: 'Keza Uwase',
+    email: 'seller@nexora.rw',
+    phone: '+250 788 654 321',
+    role: 'seller',
+  },
+];
+const nowIso = new Date().toISOString();
+const userRows = demoUsers.map((u) => {
+  const salt = randomBytes(16).toString('hex');
+  const hash = pbkdf2Sync('demo1234', salt, 100_000, 32, 'sha256').toString('hex');
+  return [q(u.id), q(u.name), q(u.email), q(u.phone), q(u.role), q(salt), q(hash), q('rw'), 'NULL', q(nowIso), q(nowIso)];
+});
+insertBatch('users', ['id', 'name', 'email', 'phone', 'role', 'password_salt', 'password_hash', 'locale', 'avatar_url', 'created_at', 'updated_at'], userRows);
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const outFile = resolve(__dirname, '..', 'seed.sql');

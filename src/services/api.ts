@@ -38,7 +38,29 @@ export interface ProductQuery {
   flash?: boolean;
 }
 
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: 'buyer' | 'seller' | 'admin';
+  locale: string;
+  avatar_url?: string;
+  verified_at?: string;
+}
+
 export const api = {
+  register: (data: { name: string; email: string; phone: string; role: string; password: string }) =>
+    request<{ message: string; verificationId: string }>('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+  verifyRegistration: (verificationId: string, code: string) =>
+    request<{ message: string; user: AuthUser; token: string }>('/auth/verify', {
+      method: 'POST',
+      body: JSON.stringify({ verificationId, code }),
+    }),
+  login: (identifier: string, password: string) =>
+    request<{ user: AuthUser; token: string }>('/auth/login', { method: 'POST', body: JSON.stringify({ identifier, password }) }),
+  me: (token: string) => request<{ user: AuthUser }>('/auth/me', { headers: { Authorization: `Bearer ${token}` } }),
+
   getCategories: () => request<{ total: number; categories: Category[] }>('/categories'),
   createCategory: (data: Partial<Category>) =>
     request<{ message: string; category: Category }>('/categories', { method: 'POST', body: JSON.stringify(data) }),
