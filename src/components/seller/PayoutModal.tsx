@@ -12,13 +12,14 @@ interface PayoutModalProps {
 export const PayoutModal: React.FC<PayoutModalProps> = ({ isOpen, onClose }) => {
   const { currentSellerShop, requestPayout } = useShopStore();
   const { addToast } = useToastStore();
+  const shop = currentSellerShop;
 
   const [amount, setAmount] = useState(500000);
   const [method, setMethod] = useState<'momo' | 'airtel' | 'bank'>('momo');
   const [accountNum, setAccountNum] = useState('+250788112233');
-  const [accountName, setAccountName] = useState(currentSellerShop.name);
+  const [accountName, setAccountName] = useState(shop?.name || '');
 
-  if (!isOpen) return null;
+  if (!isOpen || !shop) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -22,6 +22,7 @@ import { useLocaleStore } from '../../store/useLocaleStore';
 import { useProductStore } from '../../store/useProductStore';
 import { Locale } from '../../types';
 import { Logo } from '../ui/Logo';
+import { navigate } from '../../lib/navigate';
 
 const LANGUAGE_NAMES: Record<Locale, string> = {
   rw: 'Kinyarwanda',
@@ -102,7 +103,7 @@ export const Header: React.FC = () => {
               <Menu className="w-6 h-6" />
             </button>
 
-            <a href="#" onClick={() => { setSelectedCategorySlug(null); setSearchQuery(''); setActiveRole('buyer'); }} className="group">
+            <a href="#" onClick={() => { setSelectedCategorySlug(null); setSearchQuery(''); setActiveRole('buyer'); navigate('/'); }} className="group">
               <Logo />
             </a>
           </div>
@@ -362,6 +363,13 @@ export const Header: React.FC = () => {
       {/* Category Pills */}
       <div className="bg-slate-100 border-t border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 overflow-x-auto no-scrollbar flex items-center gap-2">
+          <button
+            onClick={() => navigate('/shops')}
+            className="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-300 flex items-center gap-1.5"
+          >
+            <Store className="w-3.5 h-3.5" />
+            Shops
+          </button>
           <button
             onClick={() => setSelectedCategorySlug(null)}
             className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${

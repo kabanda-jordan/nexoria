@@ -37,6 +37,31 @@ export function isoDate(offsetMs = 0): string {
   return new Date(Date.now() + offsetMs).toISOString();
 }
 
+export function slugify(text: string): string {
+  return String(text)
+    .trim()
+    .toLowerCase()
+    .replace(/['']/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60) || 'shop';
+}
+
+export async function getSessionUser(
+  env: { DB: any },
+  request: Request
+): Promise<{ id: string; name: string; email: string; phone: string; role: string } | null> {
+  const auth = request.headers.get('Authorization') || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token) return null;
+  const row = await env.DB.prepare(
+    'SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token = ? AND s.expires_at > ?'
+  )
+    .bind(token, new Date().toISOString())
+    .first();
+  return row ?? null;
+}
+
 export async function sendOtpEmail(
   env: { RESEND_API_KEY?: string },
   email: string,

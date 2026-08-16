@@ -2,34 +2,76 @@ import { create } from 'zustand';
 import { Shop, Payout, Dispute } from '../types';
 import { generateShops, INITIAL_PAYOUTS, INITIAL_DISPUTES } from '../data/seed';
 import { api } from '../services/api';
+import { useAuthStore } from './useAuthStore';
 
 const seedShops = generateShops();
 
 interface ShopState {
   shops: Shop[];
-  currentSellerShop: Shop;
+  currentSellerShop: Shop | null;
   selectedShopPublic: Shop | null;
   payouts: Payout[];
   disputes: Dispute[];
+  isShopLoading: boolean;
 
   // Actions
   setSelectedShopPublic: (shop: Shop | null) => void;
+  loadShops: () => Promise<void>;
+  loadMyShop: () => Promise<void>;
+  createShop: (data: Partial<Shop>) => Promise<{ success: boolean; message: string }>;
   approveShop: (shopId: string) => void;
   rejectShop: (shopId: string) => void;
   suspendShop: (shopId: string) => void;
   updateShop: (shopId: string, updates: Partial<Shop>) => void;
   requestPayout: (amount: number, method: 'momo' | 'airtel' | 'bank', accountNum: string, accountName: string) => void;
+  processPayout: (payoutId: string, status: 'processed' | 'rejected') => void;
   resolveDispute: (disputeId: string) => void;
 }
 
 export const useShopStore = create<ShopState>((set, get) => ({
   shops: seedShops,
-  currentSellerShop: seedShops[0], // Kigali Tech Hub by default
+  currentSellerShop: null,
   selectedShopPublic: null,
   payouts: INITIAL_PAYOUTS,
   disputes: INITIAL_DISPUTES,
+  isShopLoading: false,
 
   setSelectedShopPublic: (shop) => set({ selectedShopPublic: shop }),
+
+  loadShops: async () => {
+    try {
+      const res = await api.getShops();
+      set({ shops: res.shops });
+    } catch (e) {
+      console.warn('[api] shops hydrate failed, using local seed data', e);
+    }
+  },
+
+  loadMyShop: async () => {
+    const user = useAuthStore.getState().currentUser;
+    if (!user) return;
+    set({ isShopLoading: true });
+    try {
+      const res = await api.getMyShops();
+      const myShop = res.shops[0] ?? null;
+      set({ currentSellerShop: myShop, shops: res.shops });
+    } catch (e) {
+      console.warn('[api] load my shop failed', e);
+      set({ currentSellerShop: null });
+    } finally {
+      set({ isShopLoading: false });
+    }
+  },
+
+  createShop: async (data) => {
+    try {
+      const { shop } = await api.createShop(data);
+      set((state) => ({ shops: [shop, ...state.shops], currentSellerShop: shop }));
+      return { success: true, message: 'Shop created! Our team will review and approve it shortly.' };
+    } catch (e: any) {
+      return { success: false, message: e.message || 'Could not create shop.' };
+    }
+  },
 
   approveShop: (shopId) => {
     set((state) => ({
@@ -40,7 +82,7 @@ export const useShopStore = create<ShopState>((set, get) => ({
 
   rejectShop: (shopId) => {
     set((state) => ({
-      shops: state.shops.filter((s) => s.id !== shopId),
+      shops: state.shops.map((s) => (s.id === shopId ? { ...s, status: 'suspended' } : s)),
     }));
     api.updateShop(shopId, { status: 'suspended' }).catch((e) => console.warn('[api] reject shop failed', e));
   },
@@ -55,16 +97,18 @@ export const useShopStore = create<ShopState>((set, get) => ({
   updateShop: (shopId, updates) => {
     set((state) => ({
       shops: state.shops.map((s) => (s.id === shopId ? { ...s, ...updates } : s)),
-      currentSellerShop: state.currentSellerShop.id === shopId ? { ...state.currentSellerShop, ...updates } : state.currentSellerShop,
+      currentSellerShop: state.currentSellerShop?.id === shopId ? { ...state.currentSellerShop, ...updates } : state.currentSellerShop,
     }));
     api.updateShop(shopId, updates).catch((e) => console.warn('[api] update shop failed', e));
   },
 
   requestPayout: (amount, method, accountNum, accountName) => {
+    const shop = get().currentSellerShop;
+    if (!shop) return;
     const newPayout: Payout = {
       id: `pay-${Date.now()}`,
-      shop_id: get().currentSellerShop.id,
-      shop_name: get().currentSellerShop.name,
+      shop_id: shop.id,
+      shop_name: shop.name,
       amount,
       method,
       account_number: accountNum,
@@ -76,6 +120,15 @@ export const useShopStore = create<ShopState>((set, get) => ({
     api.requestPayout(newPayout).catch((e) => console.warn('[api] request payout failed', e));
   },
 
+  processPayout: (payoutId, status) => {
+    set((state) => ({
+      payouts: state.payouts.map((p) =>
+        p.id === payoutId ? { ...p, status, processed_at: status === 'processed' ? new Date().toISOString() : undefined } : p
+      ),
+    }));
+    api.updatePayoutStatus(payoutId, status).catch((e) => console.warn('[api] process payout failed', e));
+  },
+
   resolveDispute: (disputeId) => {
     set((state) => ({
       disputes: state.disputes.map((d) => (d.id === disputeId ? { ...d, status: 'resolved' } : d)),
@@ -84,22 +137,16 @@ export const useShopStore = create<ShopState>((set, get) => ({
   },
 }));
 
-// Hydrate shops, payouts and disputes from the live D1-backed API.
+// Hydrate payouts, disputes and the shop directory from the live API.
 (async () => {
   try {
-    const [shopsRes, payoutsRes, disputesRes] = await Promise.all([
-      api.getShops(),
-      api.getPayouts(),
-      api.getDisputes(),
-    ]);
-    const shops = shopsRes.shops;
+    const [payoutsRes, disputesRes] = await Promise.all([api.getPayouts(), api.getDisputes()]);
     useShopStore.setState({
-      shops,
-      currentSellerShop: shops[0] ?? useShopStore.getState().currentSellerShop,
       payouts: payoutsRes.payouts,
       disputes: disputesRes.disputes,
     });
   } catch (e) {
     console.warn('[api] shop hydrate failed, using local seed data', e);
   }
+  useShopStore.getState().loadShops();
 })();

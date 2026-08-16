@@ -1,4 +1,16 @@
 import { Env, mapProduct, jsonResponse, errorResponse } from '../../../../shared/db';
+import { getSessionUser } from '../../../../shared/auth';
+
+async function canManageProduct(env: Env, request: Request, product: any): Promise<{ ok: boolean; user?: any; error?: Response }> {
+  const user = await getSessionUser(env, request);
+  if (!user) return { ok: false, error: errorResponse('Authentication required. Please sign in.', 401) };
+  if (user.role === 'admin') return { ok: true, user };
+  const shop: any = await env.DB.prepare('SELECT owner_id FROM shops WHERE id = ?').bind(product.shop_id).first();
+  if (!shop || shop.owner_id !== user.id) {
+    return { ok: false, error: errorResponse('You can only manage products in your own shop.', 403) };
+  }
+  return { ok: true, user };
+}
 
 export const onRequestGet = async ({ env, params }: { env: Env; params: { id: string } }) => {
   try {
@@ -14,6 +26,9 @@ export const onRequestPatch = async ({ request, env, params }: { request: Reques
   try {
     const existing: any = await env.DB.prepare('SELECT * FROM products WHERE id = ?').bind(params.id).first();
     if (!existing) return errorResponse('Product not found', 404);
+
+    const auth = await canManageProduct(env, request, existing);
+    if (!auth.ok) return auth.error;
 
     const data: any = await request.json();
     const col = (c: string) => (data[c] !== undefined ? c : null);
@@ -49,10 +64,14 @@ export const onRequestPatch = async ({ request, env, params }: { request: Reques
   }
 };
 
-export const onRequestDelete = async ({ env, params }: { env: Env; params: { id: string } }) => {
+export const onRequestDelete = async ({ request, env, params }: { request: Request; env: Env; params: { id: string } }) => {
   try {
-    const existing: any = await env.DB.prepare('SELECT id FROM products WHERE id = ?').bind(params.id).first();
+    const existing: any = await env.DB.prepare('SELECT * FROM products WHERE id = ?').bind(params.id).first();
     if (!existing) return errorResponse('Product not found', 404);
+
+    const auth = await canManageProduct(env, request, existing);
+    if (!auth.ok) return auth.error;
+
     await env.DB.prepare('DELETE FROM products WHERE id = ?').bind(params.id).run();
     return jsonResponse({ message: 'Product deleted successfully' });
   } catch (e: any) {

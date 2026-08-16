@@ -2,10 +2,22 @@ import { Product, Category, Shop, Order, HeroSlide, Payout, Dispute, OrderStatus
 
 const API_BASE = '/api/v1';
 
+function getToken(): string | null {
+  try {
+    return localStorage.getItem('nexora_token');
+  } catch {
+    return null;
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const token = getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...init,
+    headers: { ...headers, ...((init?.headers as Record<string, string>) ?? {}) },
   });
   if (!res.ok) {
     let detail = `${res.status} ${res.statusText}`;
@@ -72,7 +84,11 @@ export const api = {
     request<{ message: string; hero_slide: HeroSlide }>(`/hero-slides/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
 
   getShops: () => request<{ total: number; shops: Shop[] }>('/shops'),
+  getMyShops: () => request<{ total: number; shops: Shop[] }>('/shops?mine=1'),
+  getShopBySlug: (slug: string) => request<{ shop: Shop }>(`/shops?slug=${encodeURIComponent(slug)}`),
   getShop: (id: string) => request<{ shop: Shop }>(`/shops/${id}`),
+  createShop: (data: Partial<Shop>) =>
+    request<{ message: string; shop: Shop }>('/shops', { method: 'POST', body: JSON.stringify(data) }),
   updateShop: (id: string, data: Partial<Shop>) =>
     request<{ message: string; shop: Shop }>(`/shops/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
 
@@ -112,6 +128,8 @@ export const api = {
   getPayouts: () => request<{ total: number; payouts: Payout[] }>('/payouts'),
   requestPayout: (data: Partial<Payout>) =>
     request<{ message: string; payout: Payout }>('/payouts', { method: 'POST', body: JSON.stringify(data) }),
+  updatePayoutStatus: (id: string, status: 'processed' | 'rejected') =>
+    request<{ message: string; payout: Payout }>(`/payouts/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
 
   getDisputes: () => request<{ total: number; disputes: Dispute[] }>('/disputes'),
   resolveDispute: (id: string) =>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocaleStore } from '../../store/useLocaleStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { navigate } from '../../lib/navigate';
 import { ShieldCheck, Phone, Mail, MapPin, Smartphone, CreditCard, Banknote } from 'lucide-react';
 import { FadeIn } from '../ui/FadeIn';
 import { Logo } from '../ui/Logo';
@@ -59,6 +60,11 @@ export const Footer: React.FC = () => {
           <div>
             <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Abagurisha (Vendors)</h4>
             <ul className="space-y-2.5 text-xs text-slate-400">
+              <li>
+                <button onClick={() => navigate('/shops')} className="hover:text-emerald-400 transition-colors font-semibold text-emerald-400">
+                  Browse Shops Directory
+                </button>
+              </li>
               <li>
                 <button onClick={() => setActiveRole('seller')} className="hover:text-emerald-400 text-left transition-colors font-semibold text-emerald-400">
                   + Fungura iduka ryawe ku Nexora

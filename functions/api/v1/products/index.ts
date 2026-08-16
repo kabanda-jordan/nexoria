@@ -1,4 +1,5 @@
 import { Env, mapProduct, jsonResponse, errorResponse } from '../../../../shared/db';
+import { getSessionUser } from '../../../../shared/auth';
 
 export const onRequestGet = async ({ request, env }: { request: Request; env: Env }) => {
   try {
@@ -62,6 +63,20 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     if (!data.shop_id || !data.title || !data.price) {
       return errorResponse('shop_id, title and price are required');
     }
+
+    const user = await getSessionUser(env, request);
+    if (!user) return errorResponse('Authentication required. Please sign in.', 401);
+    if (user.role !== 'admin') {
+      const shop: any = await env.DB.prepare('SELECT owner_id, status FROM shops WHERE id = ?').bind(data.shop_id).first();
+      if (!shop) return errorResponse('Shop not found', 404);
+      if (shop.owner_id !== user.id) {
+        return errorResponse('You can only list products in your own shop.', 403);
+      }
+      if (shop.status !== 'approved') {
+        return errorResponse('Your shop must be approved before listing products.', 403);
+      }
+    }
+
     const id = data.id || `prod-custom-${Date.now()}`;
     const now = new Date().toISOString();
     await env.DB.prepare(

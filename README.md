@@ -90,6 +90,9 @@ The production deployment runs on **Cloudflare Pages** with a real backend: cata
 |------|-------|----------|
 | Buyer | `demo@nexora.rw` | `demo1234` |
 | Seller | `seller@nexora.rw` | `demo1234` |
+| Admin | `admin@nexora.rw` | `demo1234` |
+
+> **Opening a shop (eBay-style):** any signed-in user (even a buyer) can go to the **Seller Dashboard** and "Name Your Shop" — entering name, district, phone, WhatsApp, bio, TIN and logo/banner. The shop is created with a `pending` status, owned by that user's account. Admins approve it from the Admin Panel (Shop Approvals); only then can the owner list products. Each shop gets a unique public storefront at `/shop/<slug>`, browsable from the Shops directory at `/shops`. All shop/product mutations are ownership-guarded server-side (`403` for non-owners).
 
 > **Resend sandbox note:** the test sender (`onboarding@resend.dev`) only delivers to the Resend account owner's email. New signups from other addresses are blocked with a clear error until you verify a custom domain (Resend → Domains → Add Domain) and set a verified `from` address in `shared/auth.ts`.
 
@@ -145,14 +148,16 @@ Implemented twice with identical shapes — the lightweight mock (`server.js`, l
 | `GET` | `/api/v1/auth/me` | Validate session token (`Authorization: Bearer …`) → current user |
 | `GET` | `/api/v1/users` | List all platform users (Admin) |
 | `GET` | `/api/v1/products` | 2,050+ products with pagination & filters |
-| `POST` | `/api/v1/products` | Add new product listing (Seller) |
-| `GET/PATCH/DELETE` | `/api/v1/products/:id` | Detail / edit / remove a product |
-| `GET` | `/api/v1/shops` | 50+ Rwandan merchant shops |
-| `GET/PATCH` | `/api/v1/shops/:id` | Shop detail / admin approval & suspension |
+| `POST` | `/api/v1/products` | Add new product listing (owner of an **approved** shop, or Admin) |
+| `GET/PATCH/DELETE` | `/api/v1/products/:id` | Detail / edit / remove a product (owner or Admin) |
+| `GET` | `/api/v1/shops` | Shop directory; filters `?slug=`, `?owner_id=`, `?mine=1` (Bearer token) |
+| `POST` | `/api/v1/shops` | Create a shop (authenticated; owner-bound, slug auto-unique, `pending` status) |
+| `GET/PATCH` | `/api/v1/shops/:id` | Shop detail / owner edit + admin approval & suspension (non-admins can't change `status`) |
 | `GET/POST` | `/api/v1/categories` | Category taxonomy (RW/EN/FR) |
 | `GET/POST` | `/api/v1/orders` | List / create orders + MTN MoMo trigger |
 | `GET/PATCH` | `/api/v1/orders/:id` | Order detail / status & payment updates |
 | `GET/POST` | `/api/v1/payouts` | Vendor payout requests |
+| `PATCH` | `/api/v1/payouts/:id` | Process / reject a payout (**Admin only**) |
 | `GET` | `/api/v1/disputes` | Customer disputes (Admin) |
 | `PATCH` | `/api/v1/disputes/:id` | Resolve a dispute |
 | `GET/POST` | `/api/v1/hero-slides` | Homepage hero slides |

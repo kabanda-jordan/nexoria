@@ -16,13 +16,19 @@ export const ShopStorefrontView: React.FC<ShopStorefrontViewProps> = ({ shop, on
   const shopProducts = products.filter((p) => p.shop_id === shop.id || p.shop_name === shop.name);
 
   const whatsappMessage = encodeURIComponent(`Muraho ${shop.name}, nshaka kubaza ku ibicuruzwa byanyu kuri Nexora.rw!`);
-  const whatsappUrl = `https://wa.me/${shop.whatsapp.replace(/[^0-9]/g, '')}?text=${whatsappMessage}`;
+  const whatsappUrl = shop.whatsapp
+    ? `https://wa.me/${shop.whatsapp.replace(/[^0-9]/g, '')}?text=${whatsappMessage}`
+    : '#';
 
   return (
     <div className="min-h-screen bg-slate-50 pb-16">
       {/* Top Banner */}
       <div className="relative h-64 sm:h-80 w-full bg-slate-900 overflow-hidden">
-        <img src={shop.banner_url} alt={shop.name} className="w-full h-full object-cover opacity-60" />
+        {shop.banner_url ? (
+          <img src={shop.banner_url} alt={shop.name} className="w-full h-full object-cover opacity-60" />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-emerald-600 via-teal-600 to-slate-900 opacity-70" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
 
         <div className="absolute top-6 left-6 z-10">
@@ -39,7 +45,7 @@ export const ShopStorefrontView: React.FC<ShopStorefrontViewProps> = ({ shop, on
         <div className="absolute bottom-6 left-6 right-6 max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-white">
           <div className="flex items-center gap-4">
             <img
-              src={shop.logo_url}
+              src={shop.logo_url || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop'}
               alt={shop.name}
               className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl border-4 border-white object-cover shadow-2xl bg-white shrink-0"
             />
@@ -83,15 +89,17 @@ export const ShopStorefrontView: React.FC<ShopStorefrontViewProps> = ({ shop, on
               <span>Call Shop</span>
             </a>
 
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/30 transition-all"
-            >
-              <MessageSquare className="w-4 h-4" />
-              <span>WhatsApp Chat</span>
-            </a>
+            {shop.whatsapp && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/30 transition-all"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>WhatsApp Chat</span>
+              </a>
+            )}
           </div>
         </div>
       </div>

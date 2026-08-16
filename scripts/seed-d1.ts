@@ -139,6 +139,12 @@ insertBatch(
 );
 
 const shops = generateShops();
+shops[0] = {
+  ...shops[0],
+  owner_id: 'usr-demo-seller',
+  status: 'approved',
+  verified: true,
+};
 const shopRows = shops.map((s) => [
   q(s.id),
   q(s.owner_id),
@@ -252,6 +258,13 @@ const disputeRows = INITIAL_DISPUTES.map((d) => [
 insertBatch('disputes', ['id', 'order_id', 'buyer_name', 'shop_name', 'reason', 'status', 'amount', 'created_at'], disputeRows);
 
 const demoUsers = [
+  {
+    id: 'usr-demo-admin',
+    name: 'Emma Niyonzima',
+    email: 'admin@nexora.rw',
+    phone: '+250 788 000 001',
+    role: 'admin',
+  },
   {
     id: 'usr-demo-buyer',
     name: 'Jean-Luc Rutaremara',

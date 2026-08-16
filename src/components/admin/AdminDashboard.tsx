@@ -17,18 +17,21 @@ import {
   Check,
   X,
   MessageCircleQuestion,
+  Wallet,
 } from 'lucide-react';
 import { useShopStore } from '../../store/useShopStore';
 import { useProductStore } from '../../store/useProductStore';
+import { useOrderStore } from '../../store/useOrderStore';
 import { useToastStore } from '../../store/useToastStore';
 import { Category, HeroSlide } from '../../types';
 
 export const AdminDashboard: React.FC = () => {
-  const { shops, approveShop, rejectShop, suspendShop, disputes, resolveDispute } = useShopStore();
+  const { shops, approveShop, rejectShop, suspendShop, disputes, resolveDispute, payouts, processPayout } = useShopStore();
   const { categories, addCategory, heroSlides, addHeroSlide, updateHeroSlide, products } = useProductStore();
+  const { orders } = useOrderStore();
   const { addToast } = useToastStore();
 
-  const [activeTab, setActiveTab] = useState<'gmv' | 'shops' | 'categories' | 'hero' | 'disputes'>('gmv');
+  const [activeTab, setActiveTab] = useState<'gmv' | 'shops' | 'categories' | 'hero' | 'disputes' | 'payouts'>('gmv');
 
   // Category modal states
   const [newCatNameRw, setNewCatNameRw] = useState('');
@@ -44,10 +47,11 @@ export const AdminDashboard: React.FC = () => {
   const [newHeroImg, setNewHeroImg] = useState('');
   const [showHeroModal, setShowHeroModal] = useState(false);
 
-  const totalGMV = 428000000; // 428 Million RWF GMV
+  const totalGMV = orders.reduce((sum, o) => sum + o.total, 0);
   const platformFeeCommission = totalGMV * 0.05; // 5% marketplace commission
   const pendingShops = shops.filter((s) => s.status === 'pending');
   const approvedShops = shops.filter((s) => s.status === 'approved');
+  const pendingPayouts = payouts.filter((p) => p.status === 'pending');
 
   const handleAddCategory = (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,11 +161,89 @@ export const AdminDashboard: React.FC = () => {
             >
               Dispute Resolution ({disputes.length})
             </button>
+            <button
+              onClick={() => setActiveTab('payouts')}
+              className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${
+                activeTab === 'payouts' ? 'bg-amber-500 text-slate-950 font-black' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Wallet className="w-4 h-4" />
+              <span>Seller Payouts</span>
+              {pendingPayouts.length > 0 && (
+                <span className="bg-rose-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                  {pendingPayouts.length}
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* PAYOUTS TAB */}
+        {activeTab === 'payouts' && (
+          <div className="bg-slate-800 rounded-3xl border border-slate-700 p-6 space-y-6">
+            <h3 className="text-lg font-extrabold">Seller Payout Requests</h3>
+
+            {payouts.length === 0 ? (
+              <div className="py-14 text-center">
+                <Wallet className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                <h4 className="font-bold text-slate-300">No payout requests</h4>
+                <p className="text-xs text-slate-500 mt-1">Payout requests from sellers will appear here.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-700">
+                {payouts.map((p) => (
+                  <div key={p.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <h5 className="font-bold text-white">{p.amount.toLocaleString()} RWF</h5>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {p.shop_name} • {p.method.toUpperCase()} ({p.account_number}) • {p.account_name}
+                      </p>
+                      <p className="text-[11px] text-slate-500">Requested {new Date(p.requested_at).toLocaleString()}</p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {p.status === 'pending' ? (
+                        <>
+                          <button
+                            onClick={() => {
+                              processPayout(p.id, 'processed');
+                              addToast('Payout Processed! 💸', `${p.amount.toLocaleString()} RWF sent to ${p.shop_name}.`);
+                            }}
+                            className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1"
+                          >
+                            <Check className="w-4 h-4" />
+                            Mark Paid
+                          </button>
+                          <button
+                            onClick={() => {
+                              processPayout(p.id, 'rejected');
+                              addToast('Payout Rejected', `${p.amount.toLocaleString()} RWF request rejected.`, 'warning');
+                            }}
+                            className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-1"
+                          >
+                            <X className="w-4 h-4" />
+                            Reject
+                          </button>
+                        </>
+                      ) : (
+                        <span
+                          className={`px-3 py-1 rounded-full font-bold uppercase text-xs ${
+                            p.status === 'processed' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+                          }`}
+                        >
+                          {p.status}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* GMV ANALYTICS TAB */}
         {activeTab === 'gmv' && (
           <div className="space-y-8">
@@ -169,7 +251,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="p-5 rounded-3xl bg-slate-800 border border-slate-700">
                 <span className="text-xs font-bold text-slate-400 uppercase">Platform GMV</span>
                 <div className="text-2xl font-black text-white mt-2">{totalGMV.toLocaleString()} RWF</div>
-                <p className="text-[11px] text-emerald-400 font-semibold mt-1">↑ +24.8% growth</p>
+                <p className="text-[11px] text-slate-400 mt-1">Across {orders.length} orders</p>
               </div>
 
               <div className="p-5 rounded-3xl bg-slate-800 border border-slate-700">
@@ -181,7 +263,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="p-5 rounded-3xl bg-slate-800 border border-slate-700">
                 <span className="text-xs font-bold text-slate-400 uppercase">Active Shops</span>
                 <div className="text-2xl font-black text-white mt-2">{approvedShops.length} Vendors</div>
-                <p className="text-[11px] text-slate-400 mt-1">Across 8 Rwanda districts</p>
+                <p className="text-[11px] text-slate-400 mt-1">{pendingShops.length} pending approval</p>
               </div>
 
               <div className="p-5 rounded-3xl bg-slate-800 border border-slate-700">
@@ -202,7 +284,11 @@ export const AdminDashboard: React.FC = () => {
               {shops.map((s) => (
                 <div key={s.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <img src={s.logo_url} alt="" className="w-12 h-12 rounded-xl object-cover bg-white" />
+                    <img
+                      src={s.logo_url || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop'}
+                      alt=""
+                      className="w-12 h-12 rounded-xl object-cover bg-white"
+                    />
                     <div>
                       <div className="flex items-center gap-2">
                         <h4 className="font-extrabold text-sm text-white">{s.name}</h4>

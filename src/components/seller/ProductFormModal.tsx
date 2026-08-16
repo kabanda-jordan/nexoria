@@ -16,6 +16,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ productToEdi
   const { addProduct, updateProduct, categories } = useProductStore();
   const { currentSellerShop } = useShopStore();
   const { addToast } = useToastStore();
+  const shop = currentSellerShop;
 
   const [title, setTitle] = useState(productToEdit?.title || '');
   const [description, setDescription] = useState(productToEdit?.description || '');
@@ -27,7 +28,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ productToEdi
     productToEdit?.images[0] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop'
   );
 
-  if (!isOpen) return null;
+  if (!isOpen || !shop) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,8 +49,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ productToEdi
       addToast('Product Updated! 📝', `${title} has been updated.`);
     } else {
       addProduct({
-        shop_id: currentSellerShop.id,
-        shop_name: currentSellerShop.name,
+        shop_id: shop.id,
+        shop_name: shop.name,
         category_id: categoryId,
         category_slug: selectedCat?.slug || 'electronics-computers',
         title,
@@ -59,7 +60,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ productToEdi
         stock: Number(stock),
         status: 'active',
         images: [imageUrl],
-        tags: [selectedCat?.slug || 'general', currentSellerShop.district.toLowerCase()],
+        tags: [selectedCat?.slug || 'general', shop.district.toLowerCase()],
         wholesale_tiers: [
           { min_qty: 5, price_per_unit: Math.round(Number(price) * 0.9) },
         ],

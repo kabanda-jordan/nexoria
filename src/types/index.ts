@@ -136,7 +136,7 @@ export interface Review {
 }
 
 export type PayoutMethod = 'momo' | 'airtel' | 'bank';
-export type PayoutStatus = 'pending' | 'completed' | 'rejected';
+export type PayoutStatus = 'pending' | 'processed' | 'completed' | 'rejected';
 
 export interface Payout {
   id: string;
