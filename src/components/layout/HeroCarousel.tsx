@@ -57,11 +57,12 @@ export const HeroCarousel: React.FC = () => {
       </div>
 
       {/* Sliding slideshow */}
-      <div
-        className="relative w-full overflow-hidden group/slideshow"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-      >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+        <div
+          className="relative w-full overflow-hidden rounded-3xl group/slideshow shadow-2xl ring-1 ring-slate-800"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
         {/* Track — slides side-ways like eBay */}
         <motion.div
           className="flex"
@@ -74,7 +75,7 @@ export const HeroCarousel: React.FC = () => {
               onClick={() => {
                 if (slide.category_slug) setSelectedCategorySlug(slide.category_slug);
               }}
-              className={`relative w-full shrink-0 h-[420px] sm:h-[500px] lg:h-[560px] ${
+              className={`relative w-full shrink-0 h-[320px] sm:h-[380px] lg:h-[440px] ${
                 slide.category_slug ? 'cursor-pointer' : ''
               }`}
             >
@@ -168,6 +169,7 @@ export const HeroCarousel: React.FC = () => {
           ))}
         </div>
       </div>
+    </div>
     </section>
   );
 };
