@@ -9,13 +9,13 @@ const TOKEN_KEY = 'nexora_token';
 const USER_KEY = 'nexora_user';
 
 const authPath = (mode: AuthMode): string => {
-  if (mode === 'login') return '/login';
-  return '/register';
+  if (mode === 'login') return '/api/auth/login';
+  return '/api/auth/signin';
 };
 
 const leaveAuthPath = () => {
   const p = getPath();
-  if (p === '/login' || p === '/register') {
+  if (p === '/api/auth/login' || p === '/api/auth/signin') {
     window.history.replaceState({}, '', '/');
     window.dispatchEvent(new PopStateEvent('popstate'));
   }

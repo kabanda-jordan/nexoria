@@ -39,8 +39,8 @@ export function App() {
     const syncModalWithUrl = () => {
       const p = getPath();
       const { isAuthModalOpen, authMode, openAuthModal, closeAuthModal, setAuthMode } = useAuthStore.getState();
-      const isLogin = p === '/login';
-      const isRegister = p === '/register';
+      const isLogin = p === '/api/auth/login';
+      const isRegister = p === '/api/auth/signin';
       if (isLogin || isRegister) {
         if (!isAuthModalOpen) {
           openAuthModal(isLogin ? 'login' : 'signup');
