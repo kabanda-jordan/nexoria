@@ -16,6 +16,7 @@ interface ShopState {
 
   // Actions
   setSelectedShopPublic: (shop: Shop | null) => void;
+  setCurrentSellerShop: (shop: Shop | null) => void;
   loadShops: () => Promise<void>;
   loadMyShop: () => Promise<void>;
   createShop: (data: Partial<Shop>) => Promise<{ success: boolean; message: string }>;
@@ -37,6 +38,7 @@ export const useShopStore = create<ShopState>((set, get) => ({
   isShopLoading: false,
 
   setSelectedShopPublic: (shop) => set({ selectedShopPublic: shop }),
+  setCurrentSellerShop: (shop) => set({ currentSellerShop: shop }),
 
   loadShops: async () => {
     try {

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Product, Category, HeroSlide } from '../types';
 import { INITIAL_CATEGORIES, INITIAL_HERO_SLIDES, generateShops, generate2000Products } from '../data/seed';
 import { api } from '../services/api';
+import { useToastStore } from './useToastStore';
 
 // Initialize data engines once
 const seedShops = generateShops();
@@ -75,7 +76,10 @@ export const useProductStore = create<ProductState>((set) => ({
           products: state.products.map((p) => (p.id === newProd.id ? { ...p, ...product } : p)),
         }));
       })
-      .catch((e) => console.warn('[api] create product failed', e));
+      .catch((e) => {
+        console.warn('[api] create product failed', e);
+        useToastStore.getState().addToast('Product Not Published', e.message || 'Could not publish this product.', 'error');
+      });
   },
 
   updateProduct: (id: string, updates: Partial<Product>) => {
@@ -89,7 +93,10 @@ export const useProductStore = create<ProductState>((set) => ({
           products: state.products.map((p) => (p.id === id ? { ...p, ...product } : p)),
         }));
       })
-      .catch((e) => console.warn('[api] update product failed', e));
+      .catch((e) => {
+        console.warn('[api] update product failed', e);
+        useToastStore.getState().addToast('Product Not Updated', e.message || 'Could not update this product.', 'error');
+      });
   },
 
   deleteProduct: (id: string) => {

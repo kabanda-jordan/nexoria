@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, MapPin, Phone, MessageSquare, Star, ArrowLeft, Store, Package } from 'lucide-react';
+import { ShieldCheck, MapPin, Phone, MessageSquare, Star, ArrowLeft, Store, Package, Plus, AlertTriangle } from 'lucide-react';
 import { Shop } from '../../types';
 import { useProductStore } from '../../store/useProductStore';
+import { useAuthStore } from '../../store/useAuthStore';
+import { useShopStore } from '../../store/useShopStore';
 import { ProductCard } from '../buyer/ProductCard';
+import { ProductFormModal } from './ProductFormModal';
 
 interface ShopStorefrontViewProps {
   shop: Shop;
@@ -12,6 +15,11 @@ interface ShopStorefrontViewProps {
 
 export const ShopStorefrontView: React.FC<ShopStorefrontViewProps> = ({ shop, onBack }) => {
   const { products } = useProductStore();
+  const { currentUser } = useAuthStore();
+  const { setCurrentSellerShop } = useShopStore();
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+
+  const isOwner = currentUser?.id === shop.owner_id || currentUser?.role === 'admin';
 
   const shopProducts = products.filter((p) => p.shop_id === shop.id || p.shop_name === shop.name);
 
@@ -19,6 +27,11 @@ export const ShopStorefrontView: React.FC<ShopStorefrontViewProps> = ({ shop, on
   const whatsappUrl = shop.whatsapp
     ? `https://wa.me/${shop.whatsapp.replace(/[^0-9]/g, '')}?text=${whatsappMessage}`
     : '#';
+
+  const openProductModal = () => {
+    setCurrentSellerShop(shop);
+    setIsProductModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 pb-16">
@@ -106,7 +119,7 @@ export const ShopStorefrontView: React.FC<ShopStorefrontViewProps> = ({ shop, on
 
       {/* Published Products Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
-        <div className="flex items-center justify-between pb-6 border-b border-slate-200">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-200">
           <div>
             <h3 className="text-xl font-black text-slate-900 flex items-center gap-2">
               <Package className="w-5 h-5 text-emerald-600" />
@@ -117,10 +130,32 @@ export const ShopStorefrontView: React.FC<ShopStorefrontViewProps> = ({ shop, on
             </p>
           </div>
 
-          <span className="bg-emerald-100 text-emerald-800 font-extrabold text-xs px-3 py-1 rounded-full">
-            {shopProducts.length} Products
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="bg-emerald-100 text-emerald-800 font-extrabold text-xs px-3 py-1 rounded-full">
+              {shopProducts.length} Products
+            </span>
+
+            {isOwner && (
+              <button
+                onClick={openProductModal}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 active:scale-95 transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                Add Product
+              </button>
+            )}
+          </div>
         </div>
+
+        {isOwner && shop.status !== 'approved' && (
+          <div className="mt-6 flex items-start gap-2.5 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs leading-relaxed">
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <p>
+              Your shop is <span className="font-bold">{shop.status}</span>. Products can only be published once our team
+              approves it — usually within 24 hours.
+            </p>
+          </div>
+        )}
 
         {shopProducts.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-6">
@@ -132,10 +167,25 @@ export const ShopStorefrontView: React.FC<ShopStorefrontViewProps> = ({ shop, on
           <div className="py-16 text-center">
             <Store className="w-12 h-12 text-slate-300 mx-auto mb-3" />
             <h4 className="font-bold text-slate-800">No active products listed yet</h4>
-            <p className="text-xs text-slate-500 mt-1">Check back soon for new inventory updates from this vendor.</p>
+            <p className="text-xs text-slate-500 mt-1">
+              {isOwner
+                ? 'Add your first product to start selling to buyers across Rwanda.'
+                : 'Check back soon for new inventory updates from this vendor.'}
+            </p>
+            {isOwner && (
+              <button
+                onClick={openProductModal}
+                className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 active:scale-95 transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                Add Your First Product
+              </button>
+            )}
           </div>
         )}
       </div>
+
+      <ProductFormModal isOpen={isProductModalOpen} onClose={() => setIsProductModalOpen(false)} />
     </div>
   );
 };
