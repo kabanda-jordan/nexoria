@@ -4,6 +4,7 @@ import { Store, MapPin, Phone, MessageSquare, FileText, Image as ImageIcon, Arro
 import { useShopStore } from '../../store/useShopStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useToastStore } from '../../store/useToastStore';
+import { CloudinaryUpload } from '../ui/CloudinaryUpload';
 import { RWANDA_LOCATIONS } from '../../data/rwandaLocations';
 
 export const ShopOnboarding: React.FC = () => {
@@ -204,6 +205,12 @@ export const ShopOnboarding: React.FC = () => {
                     className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-emerald-500"
                   />
                 </div>
+                <CloudinaryUpload
+                  onUpload={(url) => setLogoUrl(url)}
+                  label="Upload Logo"
+                  hint="Square image works best"
+                  className="mt-2"
+                />
               </div>
 
               <div>
@@ -218,6 +225,12 @@ export const ShopOnboarding: React.FC = () => {
                     className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-emerald-500"
                   />
                 </div>
+                <CloudinaryUpload
+                  onUpload={(url) => setBannerUrl(url)}
+                  label="Upload Banner"
+                  hint="Wide banner, e.g. 1200×400"
+                  className="mt-2"
+                />
               </div>
             </div>
 

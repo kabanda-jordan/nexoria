@@ -4,6 +4,7 @@ import { X, Plus, Trash2, Image, Tag, DollarSign, Package, Check } from 'lucide-
 import { useProductStore } from '../../store/useProductStore';
 import { useShopStore } from '../../store/useShopStore';
 import { useToastStore } from '../../store/useToastStore';
+import { CloudinaryUpload } from '../ui/CloudinaryUpload';
 import { Product } from '../../types';
 
 interface ProductFormModalProps {
@@ -158,14 +159,30 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ productToEdi
 
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">Image URL</label>
-              <input
-                type="url"
-                required
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://images.unsplash.com/..."
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-emerald-500"
-              />
+              <div className="flex flex-col sm:flex-row gap-3 items-start">
+                <input
+                  type="url"
+                  required
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="https://images.unsplash.com/..."
+                  className="flex-1 w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium outline-none focus:border-emerald-500"
+                />
+                <CloudinaryUpload
+                  onUpload={(url) => setImageUrl(url)}
+                  label="Upload Image"
+                  hint="JPG / PNG / WEBP, up to 10 MB"
+                  className="shrink-0"
+                />
+              </div>
+              {imageUrl && (
+                <img
+                  src={imageUrl}
+                  alt=""
+                  className="mt-3 h-28 w-28 object-cover rounded-xl border border-slate-200"
+                  onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')}
+                />
+              )}
             </div>
 
             <div>

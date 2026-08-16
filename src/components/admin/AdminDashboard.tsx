@@ -23,6 +23,7 @@ import { useShopStore } from '../../store/useShopStore';
 import { useProductStore } from '../../store/useProductStore';
 import { useOrderStore } from '../../store/useOrderStore';
 import { useToastStore } from '../../store/useToastStore';
+import { CloudinaryUpload } from '../ui/CloudinaryUpload';
 import { Category, HeroSlide } from '../../types';
 
 export const AdminDashboard: React.FC = () => {
@@ -523,6 +524,12 @@ export const AdminDashboard: React.FC = () => {
                 value={newHeroImg}
                 onChange={(e) => setNewHeroImg(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white"
+              />
+              <CloudinaryUpload
+                onUpload={(url) => setNewHeroImg(url)}
+                label="Upload Banner"
+                hint="Wide banner, e.g. 1600×600"
+                className="mt-2"
               />
             </div>
 
