@@ -35,14 +35,14 @@ export const HeroCarousel: React.FC = () => {
   const getCta = (s: HeroSlide) => (locale === 'rw' ? s.cta_text_rw : locale === 'fr' ? s.cta_text_fr : s.cta_text_en);
 
   return (
-    <section className="w-full bg-slate-950 select-none">
+    <section className="w-full select-none">
       {/* eBay-style "Today's Deals" header bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-        <div className="flex items-center justify-between py-3 border-b border-slate-800">
-          <h2 className="text-sm sm:text-base font-black text-white flex items-center gap-2 uppercase tracking-wider">
-            <Flame className="w-4 h-4 text-emerald-400" />
+        <div className="flex items-center justify-between py-3 border-b border-slate-200">
+          <h2 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+            <Flame className="w-4 h-4 text-emerald-500" />
             Today's Deals
-            <span className="hidden sm:inline text-[11px] font-bold text-slate-400 normal-case tracking-normal">
+            <span className="hidden sm:inline text-[11px] font-bold text-slate-500 normal-case tracking-normal">
               — top offers on Nexora Rwanda
             </span>
           </h2>
@@ -59,7 +59,7 @@ export const HeroCarousel: React.FC = () => {
       {/* Sliding slideshow */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
         <div
-          className="relative w-full overflow-hidden rounded-3xl group/slideshow shadow-2xl ring-1 ring-slate-800"
+          className="relative w-full overflow-hidden rounded-3xl group/slideshow shadow-xl ring-1 ring-slate-200"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
