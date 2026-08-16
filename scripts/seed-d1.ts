@@ -92,15 +92,13 @@ sql(`CREATE TABLE IF NOT EXISTS pending_registrations (
   created_at TEXT NOT NULL
 );`);
 
-['categories', 'hero_slides', 'shops', 'products', 'orders', 'payouts', 'disputes', 'users', 'sessions', 'pending_registrations'].forEach((t) =>
-  sql(`DELETE FROM ${t};`)
-);
+['categories', 'hero_slides'].forEach((t) => sql(`DELETE FROM ${t};`));
 
 function insertBatch(table: string, columns: string[], rows: (string | number | null)[][]) {
   const BATCH = 50;
   for (let i = 0; i < rows.length; i += BATCH) {
     const chunk = rows.slice(i, i + BATCH);
-    sql(`INSERT INTO ${table} (${columns.join(',')}) VALUES ${chunk.map((r) => `(${r.join(',')})`).join(',')};`);
+    sql(`INSERT OR IGNORE INTO ${table} (${columns.join(',')}) VALUES ${chunk.map((r) => `(${r.join(',')})`).join(',')};`);
   }
 }
 
