@@ -36,7 +36,7 @@ interface AuthState {
   setActiveRole: (role: UserRole) => void;
 
   // Actions
-  login: (name: string, emailOrPhone: string, password: string) => Promise<{ success: boolean; message: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   startSignup: (name: string, email: string, phone: string, role: UserRole, password?: string) => Promise<{ success: boolean; message: string }>;
   resendVerificationCode: () => Promise<boolean>;
   verifyEmailCode: (code: string) => Promise<{ success: boolean; message: string }>;
@@ -76,9 +76,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setAuthMode: (mode: AuthMode) => set({ authMode: mode }),
   setActiveRole: (role: UserRole) => set({ activeRole: role }),
 
-  login: async (_name, identifier, password) => {
+  login: async (email, password) => {
     try {
-      const { user, token } = await api.login(identifier, password);
+      const { user, token } = await api.login(email, password);
       localStorage.setItem(TOKEN_KEY, token);
       localStorage.setItem(USER_KEY, JSON.stringify(user));
       set({

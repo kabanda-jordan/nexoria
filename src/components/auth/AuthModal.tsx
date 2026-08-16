@@ -26,8 +26,7 @@ export const AuthModal: React.FC = () => {
   const { addToast } = useToastStore();
 
   // Form states
-  const [loginName, setLoginName] = useState('');
-  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
   const [signupName, setSignupName] = useState('');
@@ -55,7 +54,7 @@ export const AuthModal: React.FC = () => {
       return;
     }
 
-    const res = await login(loginName, loginIdentifier, loginPassword);
+    const res = await login(loginEmail, loginPassword);
     if (res.success) {
       addToast('Welcome back to Nexora! 👋', res.message);
     } else {
@@ -164,30 +163,15 @@ export const AuthModal: React.FC = () => {
             {authMode === 'login' && (
               <form onSubmit={handleLoginSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
-                  <div className="relative flex items-center">
-                    <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5" />
-                    <input
-                      type="text"
-                      required
-                      value={loginName}
-                      onChange={(e) => setLoginName(e.target.value)}
-                      placeholder="e.g. Jean-Luc Rutaremara"
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium text-slate-900 outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Email or Phone Number</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
                   <div className="relative flex items-center">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3.5" />
                     <input
-                      type="text"
+                      type="email"
                       required
-                      value={loginIdentifier}
-                      onChange={(e) => setLoginIdentifier(e.target.value)}
-                      placeholder="e.g. jeanluc@nexora.rw or +250 788..."
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      placeholder="e.g. demo@nexora.rw"
                       className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium text-slate-900 outline-none focus:border-emerald-500"
                     />
                   </div>
